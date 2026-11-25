@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Снаряжение</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&display=swap">
+<style>
+/* Shared kit, identical in every Klesh mini app: iOS grouped look, Telegram theme, system type,
+   spacing 4/8/12/16/24, radii 12/16, segmented tabs, chips, disclosure chevrons, 44pt targets. */
+:root{
+  --bg:#F2F2F7; --card:#FFFFFF; --ink:#000000; --muted:#6C6C70; --rule:rgba(60,60,67,.22);
+  --accent:#007AFF; --accent-text:#0062D1; --accent-fill:#0062D1; --on-accent:#FFFFFF;
+  --hot:#E0582F; --hot-text:#B93E0E; --hot-fill:#CC4516; --good:#248A3D; --good-text:#1D7333; --good-fill:#1A7F37; --wool:#B9A27C;
+  --seg:rgba(118,118,128,.12); --seg-on:#FFFFFF; --seg-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro",system-ui,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not(.tg){
+  --bg:#000000; --card:#1C1C1E; --ink:#FFFFFF; --muted:#AEAEB2; --rule:rgba(84,84,88,.65);
+  --accent:#0A84FF; --accent-text:#4DA3FF; --accent-fill:#0A6CD6; --on-accent:#FFFFFF;
+  --hot:#F07A52; --hot-text:#FF8F66; --good:#30D158; --good-text:#30D158; --wool:#C9B48E;
+  --seg:rgba(118,118,128,.24); --seg-on:#636366; --seg-shadow:none; color-scheme:dark}}
+/* Inside Telegram its theme wins: grouped background = secondary_bg, cards = section_bg. */
+html.tg{--bg:var(--tg-theme-secondary-bg-color,var(--tg-theme-bg-color));--card:var(--tg-theme-section-bg-color,var(--tg-theme-bg-color));
+  --ink:var(--tg-theme-text-color);--muted:color-mix(in srgb,var(--tg-theme-hint-color) 72%,var(--tg-theme-text-color));
+  --rule:var(--tg-theme-section-separator-color,color-mix(in srgb,var(--tg-theme-hint-color) 35%,transparent));
+  --accent:var(--tg-theme-button-color);--accent-text:color-mix(in srgb,var(--tg-theme-link-color) 75%,var(--tg-theme-text-color));
+  --accent-fill:color-mix(in srgb,var(--tg-theme-button-color) 82%,#000);--on-accent:var(--tg-theme-button-text-color);color-scheme:light}
+html.tg.tg-dark{--hot:#F07A52;--hot-text:#FF8F66;--good:#30D158;--good-text:#30D158;--wool:#C9B48E;
+  --seg:rgba(118,118,128,.24);--seg-on:#636366;--seg-shadow:none;color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 var(--body);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(16px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(24px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)))}
+button,a,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent-text)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+p{margin:0}
+.brand{font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:.005em}
+.sub{color:var(--muted);font-size:15px;line-height:1.4;margin:8px 0 0}
+.note{font-size:15px;line-height:1.4;color:var(--muted);margin:0}
+.tag{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text)}
+.tag.hot{color:var(--hot-text)}.tag.mix{color:var(--muted)}
+
+/* inset grouped card */
+.card{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.main{box-shadow:inset 0 0 0 2px var(--accent)}
+
+/* segmented tabs: fit 393pt, scroll only inside the bar if they ever do not */
+.tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(max-content,1fr);gap:2px;padding:2px;border-radius:12px;background:var(--seg);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{min-width:0;border:0;background:transparent;border-radius:10px;padding:0 10px;min-height:44px;
+  font-size:13px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--seg-on);box-shadow:var(--seg-shadow)}
+
+/* chips: pill links with a 44pt target */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;text-decoration:none;
+  font-size:15px;font-weight:600;color:var(--accent-text);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;min-height:44px;padding:0 20px;border:0;border-radius:999px;
+  background:var(--accent-fill);color:var(--on-accent);font-size:17px;font-weight:600;text-decoration:none}
+.lnk{display:inline-flex;align-items:center;align-self:flex-start;min-height:44px;color:var(--accent-text);text-decoration:none;font-size:17px}
+
+/* disclosure: chevron instead of the native triangle */
+details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;cursor:pointer;font-weight:600;font-size:17px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"";flex:none;width:9px;height:9px;margin:-5px 4px 0 0;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+details[open]>summary::after{transform:rotate(-135deg);margin-top:5px}
+@media (prefers-reduced-motion:reduce){details>summary::after{transition:none}}
+
+/* Four tabs: layer kit with a running total, cart with price links, where to try on in Kraków, overnight checklist. */
+.app{padding-bottom:16px}
+.brand{font-size:30px}
+.sub{margin-top:4px}
+.tabs b{display:inline-block;min-width:18px;margin-left:4px;padding:0 5px;border-radius:9px;background:var(--hot-fill);color:#fff;font-size:12px;line-height:18px;font-variant-numeric:tabular-nums}
+h2{font-family:var(--display);font-weight:900;font-size:26px;text-transform:uppercase;margin:8px 0 0;line-height:1}
+
+/* kit */
+.layer{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lh{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lh b{font-family:var(--display);font-size:22px;text-transform:uppercase;line-height:1}
+.lh span{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.why{margin:0;color:var(--muted);font-size:15px}
+.choices{display:grid;gap:8px}
+.ch{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;text-align:left;border:1px solid var(--rule);background:transparent;border-radius:12px;padding:12px;color:var(--ink)}
+.ch[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--rule);grid-row:span 2}
+.ch[aria-pressed="true"] .dot{border-color:var(--accent);background:radial-gradient(var(--accent) 42%,transparent 48%)}
+.ch .n{font-weight:600;font-size:16px;min-width:0}
+.ch .p{font-family:var(--display);font-weight:900;font-size:18px;white-space:nowrap;text-align:right}
+.ch .d{grid-column:2/-1;color:var(--muted);font-size:15px;line-height:1.35}
+.tier{display:inline-block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:1px 6px;border-radius:4px;border:1px solid currentColor;margin-left:8px;vertical-align:2px;line-height:1.4}
+.t-top{color:var(--hot-text)}.t-mid{color:var(--accent-text)}.t-low{color:var(--good-text)}
+.total{position:-webkit-sticky;position:sticky;bottom:0;z-index:5;color:var(--ink);
+  background:color-mix(in srgb,var(--card) 86%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+  border-top:.5px solid var(--rule);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:8px;padding-bottom:calc(8px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)))}
+.total .in{max-width:560px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.total b{font-family:var(--display);font-weight:900;font-size:30px;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap}
+.total span{font-size:13px;color:var(--muted);display:block}
+.presets{display:flex;gap:2px;padding:2px;border-radius:12px;background:var(--seg)}
+.presets button{min-height:44px;border:0;background:transparent;color:var(--ink);border-radius:10px;padding:0 10px;font-size:15px;font-weight:600}
+.presets button:active{background:var(--seg-on)}
+
+/* cart */
+.chips a.shop{background:var(--accent-fill);color:var(--on-accent)}
+.chips a.used{color:var(--good-text);background:color-mix(in srgb,var(--good) 13%,transparent)}
+.ci{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ci.bought{opacity:.6}
+.ci .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.ci .row b{font-size:17px;font-weight:600;min-width:0}
+.ci .row .p{font-family:var(--display);font-weight:900;font-size:20px;white-space:nowrap}
+.ci .lay{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.ci .acts{display:flex;gap:8px}
+.ci .acts button{flex:1;border:0;background:var(--seg);color:var(--ink);border-radius:10px;padding:0 8px;font-size:15px;font-weight:600;min-height:44px}
+.ci .acts button.on{background:var(--good-fill);color:#fff}
+.sum2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sum2 div{background:var(--card);border-radius:12px;padding:12px 8px;text-align:center}
+.sum2 b{display:block;font-family:var(--display);font-weight:900;font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}
+.sum2 span{font-size:13px;color:var(--muted)}
+.extra{display:flex;flex-wrap:wrap;gap:8px}
+.extra button{min-height:44px;border:1px dashed var(--rule);background:transparent;color:var(--ink);border-radius:999px;padding:0 16px;font-size:15px}
+.extra button.on{border-style:solid;border-color:var(--accent);color:var(--accent-text)}
+
+/* shops */
+div.shop{background:var(--card);border-radius:16px;padding:16px 16px 4px;display:grid;gap:4px}
+div.shop>b{font-size:17px;font-weight:600}
+div.shop .addr{font-size:15px;font-weight:500}
+div.shop p{margin:0 0 12px;font-size:15px;color:var(--muted)}
+div.shop .lnk{margin-top:-8px}
+.tip{border-left:4px solid var(--hot);padding:4px 0 4px 12px;font-size:15px;margin:0}
+
+/* checklist */
+.prog{height:6px;border-radius:3px;background:var(--rule);overflow:hidden}.prog i{display:block;height:100%;background:var(--good);transition:width .2s}
+.group{background:var(--card);border-radius:16px;padding:0 16px}
+.group h3{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:16px 0 4px}
+.item{display:flex;gap:12px;align-items:center;min-height:44px;border-top:.5px solid var(--rule)}
+.item:first-of-type{border-top:0}
+.item input{width:22px;height:22px;margin:0;accent-color:var(--good-fill);flex:none}
+.item label{flex:1;align-self:stretch;display:flex;flex-direction:column;justify-content:center;padding:10px 0;min-height:44px;font-size:17px;cursor:pointer}
+.item.done label{color:var(--muted);text-decoration:line-through}
+.item small{display:block;color:var(--muted);font-size:13px;text-decoration:none}
+.reset{align-self:flex-start;display:inline-flex;align-items:center;min-height:44px;border:0;background:transparent;color:var(--accent-text);padding:0;font-size:17px}
+@media (prefers-reduced-motion:reduce){.prog i{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">Снаряжение</div>
+    <p class="sub">Слои для гор, цены в Польше, где мерить в Кракове и что взять с ночёвкой.</p>
+  </header>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-kit" aria-selected="true" aria-controls="p-kit">Комплект</button>
+    <button role="tab" id="t-cart" aria-selected="false" aria-controls="p-cart">Корзина<b id="cartn">0</b></button>
+    <button role="tab" id="t-shops" aria-selected="false" aria-controls="p-shops">Где мерить</button>
+    <button role="tab" id="t-list" aria-selected="false" aria-controls="p-list">Чеклист</button>
+  </div>
+
+  <section id="p-kit" role="tabpanel" aria-labelledby="t-kit" style="display:flex;flex-direction:column;gap:12px"></section>
+
+  <section id="p-cart" role="tabpanel" aria-labelledby="t-cart" hidden style="display:flex;flex-direction:column;gap:12px"></section>
+
+  <section id="p-shops" role="tabpanel" aria-labelledby="t-shops" hidden style="display:flex;flex-direction:column;gap:12px">
+    <p class="tip">Удобно за один выезд: Decathlon на Zakopiańska 62a и салон 8a.pl в Galeria Solvay на Zakopiańska 105 стоят на одной улице, туда идут трамваи 8, 19, 22 и 23 в сторону Borek Fałęcki.</p>
+    <div class="shop"><b>8a.pl, салон</b><div class="addr">Galeria Solvay, ul. Zakopiańska 105</div><p>Пн–сб 10:00–21:00, вс закрыто. По их странице есть Patagonia, Deuter, The North Face, Meindl. Arc'teryx и Fjällräven в салоне не подтверждены: спроси заранее.</p><a class="lnk" href="https://8a.pl/sklep-gorski-krakow">Страница салона</a></div>
+    <div class="shop"><b>Decathlon Zakopianka</b><div class="addr">ul. Zakopiańska 62a</div><p>Бюджетные слои Forclaz: мериносы, мембраны, штаны MT500. Мерить всё можно спокойно.</p><a class="lnk" href="https://www.decathlon.pl/sklepy/">Все магазины Decathlon</a></div>
+    <div class="shop"><b>Decathlon Aleja Pokoju</b><div class="addr">al. Pokoju 46</div><p>Ближе к центру и к востоку города.</p></div>
+    <div class="shop"><b>Decathlon Bronowice</b><div class="addr">Galeria Bronowice, ul. Stawowa 61</div><p>На северо-западе.</p></div>
+    <div class="shop"><b>Minimal Step</b><div class="addr">ul. Wielicka 25</div><p>Работает 11:00–19:00. Барефуты Vivobarefoot и Xero Shoes, план примерки в мини-приложении "Барефуты".</p><a class="lnk" href="https://maps.app.goo.gl/jgH3edkMNmFSgFfz5">Маршрут в Google Maps</a></div>
+    <p class="note">Часы и наличие меняются: перед поездкой проверь на сайте или позвони.</p>
+  </section>
+
+  <section id="p-list" role="tabpanel" aria-labelledby="t-list" hidden style="display:flex;flex-direction:column;gap:12px">
+    <h2 id="list-h">Ночёвка в приюте</h2>
+    <div class="prog" aria-hidden="true"><i id="prog"></i></div>
+    <div id="groups" style="display:flex;flex-direction:column;gap:12px"></div>
+    <button class="reset" id="reset" type="button">Сбросить отметки</button>
+    <p class="note">Отметки хранятся на этом устройстве.</p>
+  </section>
+
+  <p class="note" id="foot">Цены сняты в польских магазинах в ноябре 2026 (8a.pl, Breuninger, Boozt, Icebreaker, Decathlon) и зависят от цвета и размера. Где цены в злотых не нашёл, стоит пересчёт из евро и пометка.</p>
+</div>
+
+<div class="total" id="totalbar">
+  <div class="in">
+    <div><span>Комплект примерно</span><b id="sum">0 zł</b></div>
+    <div class="presets" role="group" aria-label="Готовые комплекты">
+      <button type="button" data-p="low">Бюджет</button><button type="button" data-p="mid">Середина</button><button type="button" data-p="top">Топ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+var tg=window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.platform!=='unknown'?window.Telegram.WebApp:null;
+if(tg){var R=document.documentElement;R.classList.add('tg');tg.ready();tg.expand();
+ var sch=function(){R.classList.toggle('tg-dark',tg.colorScheme==='dark');};sch();
+ try{tg.onEvent('themeChanged',sch);tg.setHeaderColor('secondary_bg_color');tg.setBackgroundColor('secondary_bg_color');}catch(e){}
+ try{tg.BackButton.show();tg.BackButton.onClick(function(){location.href='../';});}catch(e){}}
+function tap(){try{tg&&tg.HapticFeedback?tg.HapticFeedback.selectionChanged():navigator.vibrate&&navigator.vibrate(12)}catch(e){}}
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+document.addEventListener('click',function(e){var a=e.target.closest('a[href^="http"]');if(a&&tg){e.preventDefault();tg.openLink(a.href);}});
+
+// v = value used for the total (typical price), p = shown range
+var L=[
+ {k:'base',t:'База',s:'слой 1',w:'Мериносовый лонгслив у тела. Греет мокрым и не пахнет после дня ходьбы. Хлопок нельзя.',c:[
+  {n:'Icebreaker 200 Oasis LS',q:'icebreaker 200 oasis',tier:'top',p:'240–430 zł',v:300,d:'Классика мериноса, 100% шерсть. Часто бывает в скидках.',u:'https://8a.pl/bluza-termiczna-icebreaker-200-oasis-ls-crewe-undyed'},
+  {n:'Decathlon Forclaz MT500 merino',q:'forclaz mt500 merino',tier:'low',p:'≈ 200 zł*',v:200,d:'*В Польше цену не нашёл, в Ирландии €48. Хорошая база за свои деньги.',u:'https://www.decathlon.pl/sklepy/'}]},
+ {k:'mid',t:'Утепление',s:'слой 2',w:'Греет на привалах и в холодный ветер. Синтетика не боится сырости, флис дышит на подъёмах.',c:[
+  {n:"Arc'teryx Atom Hoody",q:'arcteryx atom hoody',tier:'top',p:'625–1160 zł',v:900,d:'Синтетический утеплитель, дышит, сидит стильно. Цена сильно зависит от цвета.',u:'https://8a.pl/odziez-w-gory/arcteryx?p=2'},
+  {n:'Patagonia Nano Puff Hoody',q:'patagonia nano puff hoody',tier:'mid',p:'≈ 705 zł',v:705,d:'Тёплая и лёгкая, пакуется в свой карман. Рекомендованная цена 1000 zł.',u:'https://8a.pl/kurtki-puchowe-meskie-patagonia'},
+  {n:'Patagonia R1 Air',q:'patagonia r1 air',tier:'low',p:'520–625 zł',v:560,d:'Флис для активного движения: на подъёме не перегреешься.',u:'https://8a.pl/kurtki-patagonia'}]},
+ {k:'shell',t:'Мембрана',s:'слой 3',w:'Защита от дождя и ветра. Обязательно с капюшоном, даже если небо чистое.',c:[
+  {n:"Arc'teryx Beta Jacket",q:'arcteryx beta jacket',tier:'top',p:'1215–1560 zł',v:1300,d:'Gore-Tex, отличный крой и капюшон под шлем. Покупка на годы.',u:'https://8a.pl/arcteryx'},
+  {n:'Patagonia Torrentshell 3L',q:'patagonia torrentshell 3l',tier:'mid',p:'710–750 zł',v:730,d:'Трёхслойная мембрана за половину цены Arc\'teryx.',u:'https://8a.pl/kurtki-patagonia'},
+  {n:'Decathlon Forclaz MT500',q:'forclaz mt500 kurtka wodoodporna',tier:'low',p:'≈ 620 zł*',v:620,d:'*Цена из Ирландии, €145. Проклеенные швы, 20 000 мм.',u:'https://www.decathlon.pl/sklepy/'}]},
+ {k:'down',t:'Пух для приюта',s:'вечер',w:'Для вечера и утра у приюта, когда стоишь и мёрзнешь. На ходу не нужен.',c:[
+  {n:'Patagonia Down Sweater',q:'patagonia down sweater',tier:'mid',p:'825–1060 zł',v:900,d:'Лёгкий пуховик, носится и в городе.',u:'https://8a.pl/kurtka-puchowa-patagonia-down-sweater-black'},
+  {n:'Обойтись Nano Puff',tier:'low',p:'0 zł',v:0,d:'Если уже выбрал Nano Puff или Atom, на одну ночь в приюте хватит его.',u:''}]},
+ {k:'pants',t:'Штаны',s:'низ',w:'Прочные треккинговые или софтшелл. Не джинсы: мокрые не сохнут и холодят.',c:[
+  {n:'Fjällräven Keb Trousers',q:'fjallraven keb trousers',tier:'top',p:'830–930 zł',v:880,d:'Под твой Fjällräven-рюкзак, ткань G-1000, вечные.',u:'https://8a.pl/spodnie-fjallraven/gender-meskie'},
+  {n:'Fjällräven Vidda Pro',q:'fjallraven vidda pro',tier:'mid',p:'740–990 zł',v:800,d:'Классика бренда, проще и плотнее Keb.',u:'https://8a.pl/spodnie-fjallraven/gender-meskie'},
+  {n:"Arc'teryx Gamma Pant",q:'arcteryx gamma pant',tier:'mid',p:'625–940 zł',v:780,d:'Софтшелл, тянется, держит ветер.',u:'https://8a.pl/odziez-w-gory/arcteryx?p=2'},
+  {n:'Decathlon Forclaz MT500',q:'forclaz mt500 spodnie',tier:'low',p:'136–170 zł',v:160,d:'Прочные и в разы дешевле. Для начала идеально.',u:'https://www.decathlon.pl/mezczyzna/spodnie-dlugie-meskie'}]},
+ {k:'shoes',t:'Обувь',s:'ноги',w:'Барефуты для гор. Новичку на камнях с рюкзаком первое время лучше обычные ботинки: стопа и икры привыкают месяцами. Размер бери по замеру вечером, с запасом 1 см.',c:[
+  {n:'Vivobarefoot Tracker Winter II',q:'vivobarefoot tracker winter',tier:'top',p:'≈ 670 zł',v:670,d:'Утеплённый, единственный тёплый для снега и мороза.',u:'https://sportano.pl/p/806094/buty-barefoot-meskie-vivobarefoot-tracker-winter-ii-tan'},
+  {n:'Xero Scrambler Trail Mid WP',q:'xero scrambler mid',tier:'mid',p:'505–665 zł',v:580,d:'Самый устойчивый барефут, мембрана, высокий борт. Главный кандидат.',u:'https://www.decathlon.pl/p/mp/xero-shoes/buty-berefoot-meskie-xero-shoes-scrambler-trail-mid-wp/_/R-p-ed131e94-47cb-4e5a-b423-8f0d0a3558bf'},
+  {n:'Vivobarefoot Tracker Textile AT',q:'vivobarefoot tracker',tier:'mid',p:'495–520 zł',v:500,d:'Крупный протектор для грязи и леса, ближе к настоящему барефуту.',u:'https://sportano.pl/p/879303/buty-barefoot-meskie-vivobarefoot-tracker-textile-at-obsidian'},
+  {n:'Merrell Trail Glove 8',q:'merrell trail glove',tier:'low',p:'365–435 zł',v:400,d:'Лёгкий, лучший баланс чувства земли и защиты. Промокает.',u:'https://8a.pl/buty-trailowe-merrell-trail-glove-8-black-gum'},
+  {n:'Xero Mesa Trail WP',q:'xero mesa trail',tier:'low',p:'370–410 zł',v:390,d:'Лёгкий трейловый с мембраной, самый доступный.',u:'https://8a.pl/buty-trailowe-xero-shoes-mesa-trail-wp-black'}]},
+ {k:'socks',t:'Носки',s:'ноги',w:'Мериносовые треккинговые. Мозоли начинаются с носков, а не с ботинок.',c:[
+  {n:'Darn Tough Hiker Micro Crew',q:'darn tough hiker micro crew',tier:'top',p:'139–185 zł',v:150,d:'Пожизненная гарантия, рвутся раньше ноги, чем они.',u:'https://8a.pl/skarpety-darn-tough-hiker-micro-crew-midweight-with-cushion-olive'},
+  {n:'Мериносовые Decathlon',q:'skarpety merino forclaz',tier:'low',p:'смотри на месте',v:60,d:'Бюджетный вариант, бери 2 пары. В сумме считаю примерно 60 zł.',u:''}]}
+];
+var TIERS={top:'топ',mid:'середина',low:'бюджет'};
+var X=[
+ {id:'inj',t:'Носки',n:'Injinji Trail Midweight, 2 пары',q:'injinji trail midweight',p:'150–170 zł',v:160,u:'https://www.runforest.com/pl-pl/collections/injinji/products/injinji-trail-mw-mini-crew-moonlit'},
+ {id:'sw',t:'Носки',n:'Smartwool Hike Light Crew',q:'smartwool hike light cushion crew',p:'77–120 zł',v:95,u:'https://8a.pl/skarpety-smartwool-performance-hike-light-cushion-crew-charcoal'}
+];
+var cart=store('gear-cart')||{skip:{},bought:{},x:{}};
+function enc(q){return encodeURIComponent(q);}
+function links(it){
+ var q=it.q||it.n, h='';
+ if(it.u)h+='<a class="shop" href="'+it.u+'">Магазин</a>';
+ h+='<a href="https://www.ceneo.pl/;szukaj-'+q.split(' ').map(enc).join('+')+'">Ceneo</a>';
+ h+='<a href="https://allegro.pl/listing?string='+enc(q)+'&order=p">Allegro</a>';
+ h+='<a class="used" href="https://www.olx.pl/oferty/q-'+q.split(' ').map(enc).join('-')+'/">OLX</a>';
+ h+='<a class="used" href="https://www.vinted.pl/catalog?search_text='+enc(q)+'">Vinted</a>';
+ h+='<a class="used" href="https://allegrolokalnie.pl/oferty/q/'+enc(q)+'">Allegro Lokalnie</a>';
+ return '<div class="chips">'+h+'</div>';
+}
+function cartItems(){
+ var a=[];
+ L.forEach(function(l){var c=l.c[sel[l.k]];if(c.v>0)a.push({key:l.k,t:l.t,n:c.n,q:c.q,p:c.p,v:c.v,u:c.u});});
+ X.forEach(function(x){if(cart.x[x.id])a.push({key:'x-'+x.id,t:x.t,n:x.n,q:x.q,p:x.p,v:x.v,u:x.u});});
+ return a;
+}
+function saveCart(){store('gear-cart',cart);}
+function renderCart(){
+ var items=cartItems(),all=0,left=0,got=0,n=0,h='';
+ items.forEach(function(it){var k=it.key+':'+it.n;if(cart.skip[k])return;n++;all+=it.v;if(cart.bought[k])got+=it.v;else left+=it.v;});
+ h+='<div class="sum2"><div><b>'+fmt(Math.round(all/10)*10)+'</b><span>всё новое</span></div><div><b>'+fmt(Math.round(left/10)*10)+'</b><span>осталось</span></div><div><b>'+fmt(Math.round(got/10)*10)+'</b><span>куплено</span></div></div>';
+ h+='<p class="note">Синие кнопки: где сравнить цену на новое. Зелёные: б/у на OLX, Vinted и Allegro Lokalnie, там Arc\'teryx и Fjällräven часто в 2 раза дешевле. Б/у смотри размер и мембрану на расслоение.</p>';
+ items.forEach(function(it){var k=it.key+':'+it.n,sk=cart.skip[k],b=cart.bought[k];
+  h+='<div class="ci'+(b?' bought':'')+'" '+(sk?'style="opacity:.45"':'')+'><div class="lay">'+it.t+'</div><div class="row"><b>'+it.n+'</b><span class="p">'+it.p+'</span></div>'+(sk?'':links(it))+
+   '<div class="acts"><button type="button" data-a="bought" data-k="'+k+'" class="'+(b?'on':'')+'">'+(b?'Куплено':'Отметить купленным')+'</button><button type="button" data-a="skip" data-k="'+k+'">'+(sk?'Вернуть':'Уже есть')+'</button></div></div>';});
+ h+='<div class="layer"><div class="lh"><b>Добавить</b><span>не из слоёв</span></div><div class="extra">';
+ X.forEach(function(x){h+='<button type="button" data-x="'+x.id+'" class="'+(cart.x[x.id]?'on':'')+'">'+(cart.x[x.id]?'✓ ':'+ ')+x.n+'</button>';});
+ h+='</div></div><p class="note">Состав корзины берётся из вкладки "Комплект": поменяешь вещь там, поменяется и тут.</p>';
+ document.getElementById('p-cart').innerHTML=h;
+ document.getElementById('cartn').textContent=n;
+ document.querySelectorAll('#p-cart [data-a]').forEach(function(b){b.onclick=function(){tap();var m=cart[b.dataset.a];m[b.dataset.k]=!m[b.dataset.k];saveCart();renderCart();}});
+ document.querySelectorAll('#p-cart [data-x]').forEach(function(b){b.onclick=function(){tap();cart.x[b.dataset.x]=!cart.x[b.dataset.x];saveCart();renderCart();}});
+}
+var sel=store('gear-sel')||{};
+L.forEach(function(l){if(sel[l.k]==null)sel[l.k]=l.c.length-1;});
+
+function fmt(n){return n.toLocaleString('ru-RU')+' zł';}
+function renderKit(){
+ var h='';
+ L.forEach(function(l){
+  h+='<div class="layer"><div class="lh"><b>'+l.t+'</b><span>'+l.s+'</span></div><p class="why">'+l.w+'</p><div class="choices">';
+  l.c.forEach(function(c,i){
+   h+='<button type="button" class="ch" data-k="'+l.k+'" data-i="'+i+'" aria-pressed="'+(sel[l.k]===i)+'"><span class="dot" aria-hidden="true"></span><span class="n">'+c.n+'<span class="tier t-'+c.tier+'">'+TIERS[c.tier]+'</span></span><span class="p">'+c.p+'</span><span class="d">'+c.d+'</span></button>';
+  });
+  var cur=l.c[sel[l.k]];
+  h+='</div>'+(cur.v>0?links(cur):'')+'</div>';
+ });
+ h+='<p class="note">Шапка, перчатки и баф у тебя наверняка есть. Если нет, ещё примерно 150–300 zł.</p>';
+ document.getElementById('p-kit').innerHTML=h;
+ document.querySelectorAll('.ch').forEach(function(b){b.onclick=function(){tap();sel[b.dataset.k]=+b.dataset.i;store('gear-sel',sel);renderKit();}});
+ var s=L.reduce(function(a,l){return a+l.c[sel[l.k]].v},0);
+ document.getElementById('sum').textContent='≈ '+fmt(Math.round(s/10)*10);
+ renderCart();
+}
+document.querySelectorAll('.presets button').forEach(function(b){b.onclick=function(){tap();var t=b.dataset.p;
+ L.forEach(function(l){var i=-1;l.c.forEach(function(c,j){if(i<0&&c.tier===t)i=j});
+  if(i<0)i=t==='top'?0:l.c.length-1; sel[l.k]=i;});
+ store('gear-sel',sel);renderKit();}});
+
+// checklist
+var G=[
+ ['Документы и связь',[['Телефон и павербанк','кабель тоже'],['Мак в чехле и зарядка 100 Вт','Клешня едет с тобой, заряжаемся в приюте'],['Режим модема на телефоне','Мак подключён к нему заранее'],['Документы и карта страховки',''],['Наличные','в приютах не везде берут карту'],['Офлайн-карта','mapy.cz, скачай район заранее']]],
+ ['Одежда на тебе',[['Мериносовая база',''],['Треккинговые штаны',''],['Разношенная обувь','новые ботинки в первый поход не брать'],['Мериносовые носки','']]],
+ ['В рюкзаке',[['Утеплитель',''],['Мембранная куртка',''],['Пуховик или тёплый слой на вечер',''],['Шапка, перчатки, баф',''],['Запасные носки','сухие на вечер'],['Налобный фонарь','темнеет около 15:40']]],
+ ['Еда и вода',[['Вода 1–1,5 л',''],['Термос с чаем','очень выручает в ноябре'],['Перекус','орехи, шоколад, бутерброды']]],
+ ['Для приюта',[['Вкладыш в спальник','в некоторых приютах бельё платное'],['Зубная щётка и паста',''],['Беруши','в общих комнатах храпят'],['Лёгкие тапки или кроксы','по приюту в ботинках не ходят']]],
+ ['Безопасность',[['Аптечка и пластыри от мозолей',''],['Ледоступы (raczki)','на случай льда наверху'],['Палки','на спуске берегут колени'],['Пакет для мусора','всё уносишь с собой'],['Номер GOPR: 985 или 601 100 300','сохрани в телефон']]]
+];
+var done=store('gear-list')||{};
+function renderList(){
+ var h='',total=0,ok=0;
+ G.forEach(function(g,gi){h+='<div class="group"><h3>'+g[0]+'</h3>';
+  g[1].forEach(function(it,ii){var id='c'+gi+'_'+ii;total++;if(done[id])ok++;
+   h+='<div class="item'+(done[id]?' done':'')+'"><input type="checkbox" id="'+id+'"'+(done[id]?' checked':'')+'><label for="'+id+'">'+it[0]+(it[1]?'<small>'+it[1]+'</small>':'')+'</label></div>';});
+  h+='</div>';});
+ document.getElementById('groups').innerHTML=h;
+ document.getElementById('prog').style.width=Math.round(100*ok/total)+'%';
+ document.getElementById('list-h').textContent='Собрано '+ok+' из '+total;
+ document.querySelectorAll('.item input').forEach(function(c){c.onchange=function(){tap();done[c.id]=c.checked;store('gear-list',done);
+  if(c.checked&&tg)try{if(Object.keys(done).filter(function(k){return done[k]}).length===total)tg.HapticFeedback.notificationOccurred('success')}catch(e){}
+  renderList();}});
+}
+document.getElementById('reset').onclick=function(){done={};store('gear-list',done);renderList();};
+
+// tabs
+var tabs=document.querySelectorAll('[role=tab]');
+tabs.forEach(function(t){t.onclick=function(){tap();tabs.forEach(function(x){var on=x===t;x.setAttribute('aria-selected',on);document.getElementById(x.getAttribute('aria-controls')).hidden=!on;});
+ document.getElementById('totalbar').hidden=t.id!=='t-kit';if(t.id==='t-cart')renderCart();window.scrollTo(0,0);}});
+
+renderKit();renderList();
+})();
+</script>
+</body>
+</html>

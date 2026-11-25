@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Носки</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&display=swap">
+<style>
+/* Shared kit, identical in every Klesh mini app: iOS grouped look, Telegram theme, system type,
+   spacing 4/8/12/16/24, radii 12/16, segmented tabs, chips, disclosure chevrons, 44pt targets. */
+:root{
+  --bg:#F2F2F7; --card:#FFFFFF; --ink:#000000; --muted:#6C6C70; --rule:rgba(60,60,67,.22);
+  --accent:#007AFF; --accent-text:#0062D1; --accent-fill:#0062D1; --on-accent:#FFFFFF;
+  --hot:#E0582F; --hot-text:#B93E0E; --hot-fill:#CC4516; --good:#248A3D; --good-text:#1D7333; --good-fill:#1A7F37; --wool:#B9A27C;
+  --seg:rgba(118,118,128,.12); --seg-on:#FFFFFF; --seg-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro",system-ui,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not(.tg){
+  --bg:#000000; --card:#1C1C1E; --ink:#FFFFFF; --muted:#AEAEB2; --rule:rgba(84,84,88,.65);
+  --accent:#0A84FF; --accent-text:#4DA3FF; --accent-fill:#0A6CD6; --on-accent:#FFFFFF;
+  --hot:#F07A52; --hot-text:#FF8F66; --good:#30D158; --good-text:#30D158; --wool:#C9B48E;
+  --seg:rgba(118,118,128,.24); --seg-on:#636366; --seg-shadow:none; color-scheme:dark}}
+/* Inside Telegram its theme wins: grouped background = secondary_bg, cards = section_bg. */
+html.tg{--bg:var(--tg-theme-secondary-bg-color,var(--tg-theme-bg-color));--card:var(--tg-theme-section-bg-color,var(--tg-theme-bg-color));
+  --ink:var(--tg-theme-text-color);--muted:color-mix(in srgb,var(--tg-theme-hint-color) 72%,var(--tg-theme-text-color));
+  --rule:var(--tg-theme-section-separator-color,color-mix(in srgb,var(--tg-theme-hint-color) 35%,transparent));
+  --accent:var(--tg-theme-button-color);--accent-text:color-mix(in srgb,var(--tg-theme-link-color) 75%,var(--tg-theme-text-color));
+  --accent-fill:color-mix(in srgb,var(--tg-theme-button-color) 82%,#000);--on-accent:var(--tg-theme-button-text-color);color-scheme:light}
+html.tg.tg-dark{--hot:#F07A52;--hot-text:#FF8F66;--good:#30D158;--good-text:#30D158;--wool:#C9B48E;
+  --seg:rgba(118,118,128,.24);--seg-on:#636366;--seg-shadow:none;color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 var(--body);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(16px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(24px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)))}
+button,a,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent-text)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+p{margin:0}
+.brand{font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:.005em}
+.sub{color:var(--muted);font-size:15px;line-height:1.4;margin:8px 0 0}
+.note{font-size:15px;line-height:1.4;color:var(--muted);margin:0}
+.tag{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text)}
+.tag.hot{color:var(--hot-text)}.tag.mix{color:var(--muted)}
+
+/* inset grouped card */
+.card{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.main{box-shadow:inset 0 0 0 2px var(--accent)}
+
+/* segmented tabs: fit 393pt, scroll only inside the bar if they ever do not */
+.tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(max-content,1fr);gap:2px;padding:2px;border-radius:12px;background:var(--seg);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{min-width:0;border:0;background:transparent;border-radius:10px;padding:0 10px;min-height:44px;
+  font-size:13px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--seg-on);box-shadow:var(--seg-shadow)}
+
+/* chips: pill links with a 44pt target */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;text-decoration:none;
+  font-size:15px;font-weight:600;color:var(--accent-text);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;min-height:44px;padding:0 20px;border:0;border-radius:999px;
+  background:var(--accent-fill);color:var(--on-accent);font-size:17px;font-weight:600;text-decoration:none}
+.lnk{display:inline-flex;align-items:center;align-self:flex-start;min-height:44px;color:var(--accent-text);text-decoration:none;font-size:17px}
+
+/* disclosure: chevron instead of the native triangle */
+details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;cursor:pointer;font-weight:600;font-size:17px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"";flex:none;width:9px;height:9px;margin:-5px 4px 0 0;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+details[open]>summary::after{transform:rotate(-135deg);margin-top:5px}
+@media (prefers-reduced-motion:reduce){details>summary::after{transition:none}}
+
+/* Short report: drawn sock types up top, five rules, then product cards with prices and shop links. */
+.kicker{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text)}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(42px,12vw,64px);line-height:.9;margin:8px 0;text-transform:uppercase;text-wrap:balance}
+.dek{margin:0;font-size:17px}
+h2{font-family:var(--display);font-weight:900;font-size:28px;text-transform:uppercase;margin:8px 0 0;line-height:1}
+
+.types{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.type{background:var(--card);border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.type svg{width:40px;height:52px;margin-bottom:4px}
+.type b{display:block;font-size:15px;font-weight:600;line-height:1.25}
+.type span{display:block;font-size:13px;color:var(--muted);line-height:1.3}
+.s-line{fill:none;stroke:var(--ink);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.s-fill{fill:var(--wool)}
+.s-cuff{fill:none;stroke:var(--ink);stroke-width:2;stroke-dasharray:3 3}
+.s-acc{fill:var(--accent)}
+
+.rules{display:grid;gap:0;background:var(--card);border-radius:16px;padding:0 16px}
+.rule{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;padding:12px 0;border-top:.5px solid var(--rule)}
+.rule:first-child{border-top:0}
+.rule .n{font-family:var(--display);font-weight:900;font-size:28px;line-height:1;color:var(--hot)}
+.rule b{display:block;font-weight:600}.rule span{color:var(--muted);font-size:15px}
+
+.card{gap:12px}
+.card.pick{box-shadow:inset 0 0 0 2px var(--accent)}
+.top{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center}
+.top svg{width:56px;height:70px}
+.card h3{font-family:var(--display);font-weight:900;font-size:24px;line-height:1;margin:4px 0 0;text-transform:uppercase}
+.price{align-self:flex-start;background:var(--hot-fill);color:#fff;font-family:var(--display);font-weight:900;font-size:22px;line-height:1.1;padding:4px 10px 2px;border-radius:4px;transform:rotate(-2deg)}
+.card p{margin:0;font-size:15px}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.meta span{font-size:13px;background:var(--seg);border-radius:999px;padding:4px 10px;color:var(--muted)}
+.box{border-left:4px solid var(--hot);padding:2px 0 2px 12px;font-size:15px}
+.box b{display:block;font-size:17px;font-weight:600;margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="kicker">Репорт · снаряжение</div>
+    <h1>Носки решают</h1>
+    <p class="dek">Мозоли почти всегда начинаются с носков, а не с ботинок. Какие бывают, как выбирают профи и что взять тебе в горы и под барефуты.</p>
+  </header>
+
+  <section>
+    <h2>Какие бывают</h2>
+    <div class="types" style="margin-top:10px">
+      <div class="type"><svg viewBox="0 0 80 100" aria-hidden="true"><path class="s-fill" d="M28 6h24v52l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V6z" transform="translate(0,-2)"/><path class="s-line" d="M28 4h24v52l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V4z"/><path class="s-cuff" d="M28 14h24"/></svg><b>Crew</b><span>до середины голени, под ботинки</span></div>
+      <div class="type"><svg viewBox="0 0 80 100" aria-hidden="true"><path class="s-fill" d="M28 30h24v26l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V30z"/><path class="s-line" d="M28 30h24v26l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V30z"/><path class="s-cuff" d="M28 38h24"/></svg><b>Micro crew</b><span>чуть выше борта, универсальные</span></div>
+      <div class="type"><svg viewBox="0 0 80 100" aria-hidden="true"><path class="s-fill" d="M28 30h24v26l10 10v-4h4v6h3v-4h4v8c0 10-4 16-12 16H28c-10 0-12-8-12-16V30z"/><path class="s-line" d="M28 30h24v26l10 10M62 66v-4h4v6M66 68h3v-4h4v8c0 10-4 16-12 16H28c-10 0-12-8-12-16V30"/><path class="s-cuff" d="M28 38h24"/></svg><b>С пальцами</b><span>Injinji, для барефутов</span></div>
+      <div class="type"><svg viewBox="0 0 80 100" aria-hidden="true"><path class="s-line" style="stroke-dasharray:5 4" d="M28 30h24v26l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V30z"/><path class="s-acc" d="M31 33h18v22l12 12c4 4 3 15-6 15H31c-8 0-9-6-9-12V33z" opacity=".35"/></svg><b>Подносок</b><span>тонкий слой против мозолей</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Как выбирают профи</h2>
+    <div class="rules" style="margin-top:10px">
+      <div class="rule"><div class="n">1</div><div><b>Никакого хлопка</b><span>Мокрый хлопок трёт и холодит. Только меринос или меринос с синтетикой.</span></div></div>
+      <div class="rule"><div class="n">2</div><div><b>Точно по размеру</b><span>Складка в ботинке за пару часов становится мозолью. Носок не должен сползать.</span></div></div>
+      <div class="rule"><div class="n">3</div><div><b>Плоский шов на пальцах</b><span>Ничего не должно давить, особенно на спуске.</span></div></div>
+      <div class="rule"><div class="n">4</div><div><b>Запасная пара всегда</b><span>Промок или вспотел: переобулся на привале. Вечером в приюте сухие носки.</span></div></div>
+      <div class="rule"><div class="n">5</div><div><b>Мерить обувь в своих носках</b><span>Тонкий и плотный носок меняют посадку на полразмера.</span></div></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <h2>Что взять</h2>
+
+    <article class="card pick">
+      <div class="top"><svg viewBox="0 0 80 100" aria-hidden="true"><path class="s-fill" d="M28 20h24v36l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V20z"/><path class="s-line" d="M28 20h24v36l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V20z"/><path class="s-cuff" d="M28 28h24"/></svg>
+        <div><div class="tag">Для гор зимой · главный выбор</div><h3>Darn Tough Hiker Micro Crew Midweight</h3></div></div>
+      <div class="price">148–195 zł</div>
+      <p>Плотный мериносовый носок с амортизацией под ботинки. Держит форму годами, и у них пожизненная гарантия: протрёшь, поменяют бесплатно.</p>
+      <div class="meta"><span>меринос</span><span>средняя толщина</span><span>под ботинки</span></div>
+      <a class="btn" href="https://8a.pl/skarpety-darn-tough-hiker-micro-crew-midweight-with-cushion-olive">Смотреть в 8a.pl</a>
+    </article>
+
+    <article class="card">
+      <div class="top"><svg viewBox="0 0 80 100" aria-hidden="true"><path class="s-fill" d="M28 14h24v42l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V14z" opacity=".7"/><path class="s-line" d="M28 14h24v42l14 14c6 6 4 18-8 18H28c-10 0-12-8-12-16V14z"/><path class="s-cuff" d="M28 22h24"/></svg>
+        <div><div class="tag">Легче и дешевле</div><h3>Smartwool Hike Light Cushion Crew</h3></div></div>
+      <div class="price">77–120 zł</div>
+      <p>Тоньше Darn Tough, для межсезонья и лёгких маршрутов. Хороший второй носок в пару к основному.</p>
+      <div class="meta"><span>меринос</span><span>лёгкая амортизация</span><span>crew</span></div>
+      <a class="btn" href="https://8a.pl/skarpety-smartwool-performance-hike-light-cushion-crew-charcoal">Смотреть в 8a.pl</a>
+    </article>
+
+    <article class="card">
+      <div class="top"><svg viewBox="0 0 80 100" aria-hidden="true"><path class="s-fill" d="M28 30h24v26l10 10v-4h4v6h3v-4h4v8c0 10-4 16-12 16H28c-10 0-12-8-12-16V30z"/><path class="s-line" d="M28 30h24v26l10 10M62 66v-4h4v6M66 68h3v-4h4v8c0 10-4 16-12 16H28c-10 0-12-8-12-16V30"/></svg>
+        <div><div class="tag">Под барефуты</div><h3>Injinji Trail Midweight Mini-Crew</h3></div></div>
+      <div class="price">75–85 zł</div>
+      <p>Носок с пальцами: каждый палец отдельно, не трутся друг о друга и свободно растопыриваются в широком носке барефута. Синтетика, сохнет быстро.</p>
+      <div class="meta"><span>синтетика</span><span>с пальцами</span><span>чуть выше щиколотки</span></div>
+      <a class="btn" href="https://www.runforest.com/pl-pl/collections/injinji/products/injinji-trail-mw-mini-crew-moonlit">Смотреть в Runforest</a>
+    </article>
+
+    <article class="card">
+      <div class="top"><svg viewBox="0 0 80 100" aria-hidden="true"><path class="s-fill" d="M28 30h24v26l10 10v-4h4v6h3v-4h4v8c0 10-4 16-12 16H28c-10 0-12-8-12-16V30z"/><path class="s-line" d="M28 30h24v26l10 10M62 66v-4h4v6M66 68h3v-4h4v8c0 10-4 16-12 16H28c-10 0-12-8-12-16V30"/><path class="s-cuff" d="M28 38h24"/></svg>
+        <div><div class="tag">Барефуты зимой</div><h3>Injinji Outdoor Midweight Mini-Crew Wool</h3></div></div>
+      <div class="price">105–114 zł</div>
+      <p>Те же пальцы, но с мериносом: теплее, для холодных месяцев в барефутах.</p>
+      <div class="meta"><span>меринос</span><span>с пальцами</span><span>тёплые</span></div>
+      <a class="btn" href="https://8a.pl/injinji">Все Injinji в 8a.pl</a>
+    </article>
+
+    <div class="box"><b>Если трёт, схема из двух слоёв</b>Тонкий синтетический подносок, сверху мериносовый. Трение идёт между носками, а не о кожу. Многие треккеры так ходят на длинных маршрутах.</div>
+  </section>
+
+  <section class="card">
+    <div class="tag">Твой набор</div>
+    <h3>Сейчас и на потом</h3>
+    <p>На поход с ночёвкой в ботинках: 2 пары Darn Tough, одна на тебе, одна сухая в рюкзаке. Около 300–390 zł.</p>
+    <p>Когда купишь барефуты: 2 пары Injinji, около 150–230 zł. И мерь обувь в Minimal Step сразу в них.</p>
+  </section>
+
+  <p class="note">Цены сняты в 8a.pl, Runforest и Decathlon в ноябре 2026, зависят от цвета и скидочных кодов. Картинки схематичные.</p>
+</div>
+<script>
+var tg=window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.platform!=='unknown'?window.Telegram.WebApp:null;
+if(tg){var R=document.documentElement;R.classList.add('tg');tg.ready();tg.expand();
+ var sch=function(){R.classList.toggle('tg-dark',tg.colorScheme==='dark');};sch();
+ try{tg.onEvent('themeChanged',sch);tg.setHeaderColor('secondary_bg_color');tg.setBackgroundColor('secondary_bg_color');}catch(e){}
+ try{tg.BackButton.show();tg.BackButton.onClick(function(){location.href='../';});}catch(e){}}
+document.addEventListener('click',function(e){var a=e.target.closest('a[href^="http"]');if(a&&tg){e.preventDefault();tg.openLink(a.href);}});
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Доски судьбы</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&display=swap">
+<style>
+/* Shared kit, identical in every Klesh mini app: iOS grouped look, Telegram theme, system type,
+   spacing 4/8/12/16/24, radii 12/16, segmented tabs, chips, disclosure chevrons, 44pt targets. */
+:root{
+  --bg:#F2F2F7; --card:#FFFFFF; --ink:#000000; --muted:#6C6C70; --rule:rgba(60,60,67,.22);
+  --accent:#007AFF; --accent-text:#0062D1; --accent-fill:#0062D1; --on-accent:#FFFFFF;
+  --hot:#E0582F; --hot-text:#B93E0E; --hot-fill:#CC4516; --good:#248A3D; --good-text:#1D7333; --good-fill:#1A7F37; --wool:#B9A27C;
+  --seg:rgba(118,118,128,.12); --seg-on:#FFFFFF; --seg-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro",system-ui,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not(.tg){
+  --bg:#000000; --card:#1C1C1E; --ink:#FFFFFF; --muted:#AEAEB2; --rule:rgba(84,84,88,.65);
+  --accent:#0A84FF; --accent-text:#4DA3FF; --accent-fill:#0A6CD6; --on-accent:#FFFFFF;
+  --hot:#F07A52; --hot-text:#FF8F66; --good:#30D158; --good-text:#30D158; --wool:#C9B48E;
+  --seg:rgba(118,118,128,.24); --seg-on:#636366; --seg-shadow:none; color-scheme:dark}}
+/* Inside Telegram its theme wins: grouped background = secondary_bg, cards = section_bg. */
+html.tg{--bg:var(--tg-theme-secondary-bg-color,var(--tg-theme-bg-color));--card:var(--tg-theme-section-bg-color,var(--tg-theme-bg-color));
+  --ink:var(--tg-theme-text-color);--muted:color-mix(in srgb,var(--tg-theme-hint-color) 72%,var(--tg-theme-text-color));
+  --rule:var(--tg-theme-section-separator-color,color-mix(in srgb,var(--tg-theme-hint-color) 35%,transparent));
+  --accent:var(--tg-theme-button-color);--accent-text:color-mix(in srgb,var(--tg-theme-link-color) 75%,var(--tg-theme-text-color));
+  --accent-fill:color-mix(in srgb,var(--tg-theme-button-color) 82%,#000);--on-accent:var(--tg-theme-button-text-color);color-scheme:light}
+html.tg.tg-dark{--hot:#F07A52;--hot-text:#FF8F66;--good:#30D158;--good-text:#30D158;--wool:#C9B48E;
+  --seg:rgba(118,118,128,.24);--seg-on:#636366;--seg-shadow:none;color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 var(--body);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(16px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(24px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)))}
+button,a,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent-text)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+p{margin:0}
+.brand{font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:.005em}
+.sub{color:var(--muted);font-size:15px;line-height:1.4;margin:8px 0 0}
+.note{font-size:15px;line-height:1.4;color:var(--muted);margin:0}
+.tag{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text)}
+.tag.hot{color:var(--hot-text)}.tag.mix{color:var(--muted)}
+
+/* inset grouped card */
+.card{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.main{box-shadow:inset 0 0 0 2px var(--accent)}
+
+/* segmented tabs: fit 393pt, scroll only inside the bar if they ever do not */
+.tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(max-content,1fr);gap:2px;padding:2px;border-radius:12px;background:var(--seg);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{min-width:0;border:0;background:transparent;border-radius:10px;padding:0 10px;min-height:44px;
+  font-size:13px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--seg-on);box-shadow:var(--seg-shadow)}
+
+/* chips: pill links with a 44pt target */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;text-decoration:none;
+  font-size:15px;font-weight:600;color:var(--accent-text);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;min-height:44px;padding:0 20px;border:0;border-radius:999px;
+  background:var(--accent-fill);color:var(--on-accent);font-size:17px;font-weight:600;text-decoration:none}
+.lnk{display:inline-flex;align-items:center;align-self:flex-start;min-height:44px;color:var(--accent-text);text-decoration:none;font-size:17px}
+
+/* disclosure: chevron instead of the native triangle */
+details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;cursor:pointer;font-weight:600;font-size:17px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"";flex:none;width:9px;height:9px;margin:-5px 4px 0 0;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+details[open]>summary::after{transform:rotate(-135deg);margin-top:5px}
+@media (prefers-reduced-motion:reduce){details>summary::after{transition:none}}
+
+/* Khlebnikov's "Доски судьбы": day gaps between life events checked against powers of 2 and 3. */
+.brand{font-size:40px}
+section{display:flex;flex-direction:column;gap:12px}
+h2{font-family:var(--display);font-weight:900;font-size:26px;text-transform:uppercase;margin:4px 0 0;line-height:1}
+.card h3{font-family:var(--display);font-weight:900;font-size:24px;line-height:1;margin:0;text-transform:uppercase}
+.card p{margin:0;font-size:15px}
+.when{font-size:15px;color:var(--muted)}
+.res{background:var(--ink);color:var(--bg);border-radius:16px;padding:16px;display:grid;gap:4px}
+.res b{font-family:var(--display);font-weight:900;font-size:36px;line-height:1;font-variant-numeric:tabular-nums}
+.res span{font-size:15px;opacity:.85}
+.about{padding:0 16px;gap:0}
+.about p{margin:0 0 12px;font-size:15px}
+.about p:last-child{margin-bottom:16px}
+.about q{font-style:italic}
+.honest{border-left:4px solid var(--hot);padding:2px 0 2px 12px}
+
+/* dates: one grouped cell per event, title and delete on top, date row below */
+#evs{padding:4px 16px}
+.ev{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px 4px;align-items:center;padding:12px 0;border-top:.5px solid var(--rule)}
+.ev:first-child{border-top:0}
+.ev input{display:block;width:100%;min-width:0;max-width:100%;margin:0;border:0;border-radius:10px;background:var(--bg);color:var(--ink);font:17px/1.2 var(--body);-webkit-appearance:none;appearance:none}
+.ev input[type=text]{height:44px;padding:0 12px;font-weight:600}
+.ev input::placeholder{color:var(--muted);font-weight:400;opacity:1}
+.ev-d{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;height:44px;padding-left:12px;border-radius:10px;background:var(--bg);overflow:hidden}
+.ev-d span{font-size:15px;color:var(--muted)}
+.ev-d input[type=date]{height:44px;padding:0 12px 0 0;background:transparent;border-radius:0;text-align:right;font-variant-numeric:tabular-nums;line-height:44px}
+.ev-d input[type=date]::-webkit-date-and-time-value{text-align:right;margin:0}
+.ev-d input[type=date]::-webkit-calendar-picker-indicator{display:none}
+.ev-d input.empty{color:var(--muted)}
+.ev-d:has(input.empty){box-shadow:inset 0 0 0 1.5px var(--hot)}
+.ev .del{width:44px;height:44px;display:grid;place-items:center;padding:0;border:0;border-radius:22px;background:transparent;color:var(--muted)}
+.ev .del svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ev .del:active{background:var(--seg)}
+.ev small{grid-column:1/-1;font-size:13px;color:var(--hot-text);margin:-4px 0 0 12px}
+.ev small.x{color:var(--muted)}
+
+/* hits */
+.hit{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:12px 0;border-top:.5px solid var(--rule)}
+.hit:first-child{border-top:0;padding-top:0}
+.hit:last-child{padding-bottom:0}
+.hit>div:last-child{display:grid;gap:4px;min-width:0}
+.hit .off{font-family:var(--display);font-weight:900;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.hit .off small{display:block;font-family:var(--body);font-weight:400;font-size:13px;color:var(--muted);margin-top:4px}
+.hit p{margin:0;font-size:15px}
+.hit .fx{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.hit.s2 .off{color:var(--accent-text)}.hit.s3 .off{color:var(--hot)}.hit.mx .off{color:var(--muted)}
+
+/* line */
+svg.line{width:100%;height:auto;display:block}
+.l-axis{stroke:var(--rule);stroke-width:2}
+.l-dot{fill:var(--ink)}
+.l-txt{fill:var(--ink);font:600 12px var(--body)}
+.l-yr{fill:var(--muted);font:500 12px var(--body);font-variant-numeric:tabular-nums}
+.a2{stroke:var(--accent)}.a3{stroke:var(--hot)}.amx{stroke:var(--muted);stroke-dasharray:3 3}
+.arc{fill:none;stroke-width:1.6;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;background:var(--accent)}
+.legend i.h{background:var(--hot)}.legend i.m{background:repeating-linear-gradient(90deg,var(--muted) 0 3px,transparent 3px 6px)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">Доски судьбы</div>
+    <p class="sub">Законы времени Велимира Хлебникова на твоих датах: какие расстояния между событиями ложатся на степени двойки и тройки.</p>
+  </header>
+
+  <details class="card about">
+    <summary>О методе</summary>
+    <p>Велимир Хлебников (1885-1922), поэт-футурист, «Председатель земного шара», в «Досках судьбы» (1922) искал числовые законы истории: <q>время построено на степенях двух и трех</q>.</p>
+    <p>Правило: от узлового дня через 2ⁿ дней приходят события того же знака, через 3ⁿ дней события обратного знака.</p>
+    <p class="honest">Это поэтическая нумерология, а не наука: любое число раскладывается в суммы степеней, совпадения ничего не предсказывают. Играем.</p>
+  </details>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-dates" aria-selected="true" aria-controls="p-dates">Мои даты</button>
+    <button role="tab" id="t-hits" aria-selected="false" aria-controls="p-hits">Связи</button>
+    <button role="tab" id="t-nodes" aria-selected="false" aria-controls="p-nodes">Узловые дни</button>
+    <button role="tab" id="t-line" aria-selected="false" aria-controls="p-line">Линия</button>
+  </div>
+
+  <section id="p-dates" role="tabpanel" aria-labelledby="t-dates">
+    <div class="card" id="evs"></div>
+    <button type="button" class="btn" id="add">Добавить событие</button>
+    <p class="note">Даты хранятся только на этом устройстве. Пустые даты в расчётах не участвуют.</p>
+  </section>
+
+  <section id="p-hits" role="tabpanel" aria-labelledby="t-hits" hidden>
+    <div id="hits-sum"></div>
+    <div class="card" id="hits"></div>
+    <p class="note">Допуск ±3 дня. Степени с n ≥ 3, суммы 2ᵃ+3ᵇ с a, b ≥ 3. Хлебников: 2ⁿ того же знака, 3ⁿ обратного.</p>
+  </section>
+
+  <section id="p-nodes" role="tabpanel" aria-labelledby="t-nodes" hidden>
+    <div id="node-top"></div>
+    <div class="card" id="nodes"></div>
+    <p class="note">Ровно 2ⁿ или 3ⁿ дней (n ≥ 5) от события, в ближайшие 365 дней.</p>
+  </section>
+
+  <section id="p-line" role="tabpanel" aria-labelledby="t-line" hidden>
+    <div class="card"><div id="line"></div>
+      <div class="legend"><span><i></i>2ⁿ, того же знака</span><span><i class="h"></i>3ⁿ, обратного</span><span><i class="m"></i>смешанные</span></div>
+    </div>
+  </section>
+</div>
+<script>
+(function(){
+var tg=window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.platform!=='unknown'?window.Telegram.WebApp:null;
+if(tg){var R=document.documentElement;R.classList.add('tg');tg.ready();tg.expand();
+ var sch=function(){R.classList.toggle('tg-dark',tg.colorScheme==='dark');};sch();
+ try{tg.onEvent('themeChanged',sch);tg.setHeaderColor('secondary_bg_color');tg.setBackgroundColor('secondary_bg_color');}catch(e){}
+ try{if(tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(function(){location.href='../';});}}catch(e){}}
+function tap(){try{tg&&tg.HapticFeedback?tg.HapticFeedback.selectionChanged():navigator.vibrate&&navigator.vibrate(12)}catch(e){}}
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+document.addEventListener('click',function(e){var a=e.target.closest('a[href^="http"]');if(a&&tg){e.preventDefault();tg.openLink(a.href);}});
+
+/*CORE*/
+var DAY=86400000;
+// ISO "YYYY-MM-DD" -> integer day number in UTC, null if invalid. No local time, no DST.
+function dn(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');if(!m)return null;
+ var t=Date.UTC(+m[1],+m[2]-1,+m[3]);var d=new Date(t);
+ if(d.getUTCFullYear()!==+m[1]||d.getUTCMonth()!==+m[2]-1||d.getUTCDate()!==+m[3])return null;return Math.round(t/DAY);}
+function iso(n){var d=new Date(n*DAY);return d.toISOString().slice(0,10);}
+function todayDn(now){now=now||new Date();return Math.round(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())/DAY);}
+var SUP={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function sup(n){return String(n).replace(/\d/g,function(c){return SUP[c];});}
+var MAXD=80000,SIGN={s2:'того же знака',s3:'обратного знака',mx:'смешанный ход'};
+// Candidate numbers: 2^n, 3^n (n>=3), 2*3^n (n>=3), 2^a+3^b (a,b>=3).
+function cands(){var c=[],a,b,p,q;
+ for(a=3,p=8;p<=MAXD;a++,p*=2)c.push({v:p,f:'2'+sup(a),k:'s2',r:0});
+ for(b=3,q=27;q<=MAXD;b++,q*=3){c.push({v:q,f:'3'+sup(b),k:'s3',r:0});if(2*q<=MAXD)c.push({v:2*q,f:'2·3'+sup(b),k:'s3',r:1});}
+ for(a=3,p=8;p<MAXD;a++,p*=2)for(b=3,q=27;p+q<=MAXD;b++,q*=3)c.push({v:p+q,f:'2'+sup(a)+'+3'+sup(b),k:'mx',r:2});
+ return c;}
+var C=cands();
+function matches(d,tol){tol=tol==null?3:tol;var out=[];
+ C.forEach(function(c){var o=d-c.v;if(Math.abs(o)<=tol)out.push({v:c.v,f:c.f,k:c.k,r:c.r,off:o});});return out;}
+function dated(evs){return evs.filter(function(e){return dn(e.d)!=null;}).map(function(e){return {id:e.id,t:e.t||'без названия',n:dn(e.d)};}).sort(function(a,b){return a.n-b.n;});}
+function pairs(evs){var L=dated(evs),h=[];
+ for(var i=0;i<L.length;i++)for(var j=i+1;j<L.length;j++){var d=L[j].n-L[i].n;if(d<=0)continue;
+  matches(d).forEach(function(m){h.push({a:L[i],b:L[j],d:d,m:m});});}
+ h.sort(function(x,y){return Math.abs(x.m.off)-Math.abs(y.m.off)||x.m.r-y.m.r||x.d-y.d;});return h;}
+function nodes(evs,today,span){span=span||365;var L=dated(evs),o=[];
+ L.forEach(function(e){[2,3].forEach(function(b){for(var n=5,p=Math.pow(b,5);e.n+p<=today+span;n++,p*=b){var t=e.n+p;
+  if(t>=today)o.push({e:e,t:t,in:t-today,f:b+sup(n),v:p,k:b===2?'s2':'s3'});}});});
+ o.sort(function(x,y){return x.t-y.t||x.v-y.v;});return o;}
+/*END*/
+
+var MON=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+function human(n){var d=new Date(n*DAY);return d.getUTCDate()+' '+MON[d.getUTCMonth()]+' '+d.getUTCFullYear();}
+function plural(n,a,b,c){var m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<12||h>14)?b:c;}
+function days(n){return n+' '+plural(n,'день','дня','дней');}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function soon(n){return n===0?'сегодня':n===1?'завтра':'через '+days(n);}
+
+var SEED=[{t:'Рождение',d:''},{t:'Бросил траву',d:'2026-02-15',x:'дата примерная'},{t:'Переезд в Краков',d:''},
+ {t:'Первая запись Клешне',d:'2026-01-28'},{t:'Новое имя: Вешня',d:'2026-11-25'}];
+var evs=store('doski-dates');
+if(!Array.isArray(evs)){evs=SEED.map(function(e,i){return {id:'s'+i,t:e.t,d:e.d,x:e.x||''};});store('doski-dates',evs);}
+function save(){store('doski-dates',evs);}
+
+var $=function(id){return document.getElementById(id);};
+var BIN='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg>';
+function renderDates(){
+ $('evs').innerHTML=evs.length?evs.map(function(e){var bad=dn(e.d)==null;
+  return '<div class="ev" data-id="'+esc(e.id)+'"><input type="text" data-k="t" value="'+esc(e.t)+'" placeholder="Что случилось" aria-label="Событие">'+
+   '<button type="button" class="del" aria-label="Удалить">'+BIN+'</button>'+
+   '<label class="ev-d"><span>Дата</span><input type="date" data-k="d" value="'+esc(e.d)+'" class="'+(bad?'empty':'')+'" aria-label="Дата"></label>'+
+   (bad?'<small>Укажи дату, иначе событие не считается</small>':e.x?'<small class="x">'+esc(e.x)+'</small>':'')+
+   '</div>';}).join(''):'<p class="when">Пока пусто. Добавь первое событие.</p>';
+}
+$('evs').addEventListener('input',function(e){var i=e.target.closest('input'),r=e.target.closest('.ev');if(!i||!r)return;
+ var ev=evs.filter(function(x){return x.id===r.dataset.id;})[0];if(!ev)return;ev[i.dataset.k]=i.value;save();
+ if(i.dataset.k==='d'){i.classList.toggle('empty',dn(i.value)==null);}});
+$('evs').addEventListener('change',function(e){if(e.target.dataset&&e.target.dataset.k==='d'){renderDates();}});
+$('evs').addEventListener('click',function(e){var b=e.target.closest('.del');if(!b)return;var r=b.closest('.ev');
+ var ev=evs.filter(function(x){return x.id===r.dataset.id;})[0];if(!ev)return;
+ var msg='Удалить «'+(ev.t||'событие')+'»?';
+ function del(){tap();evs=evs.filter(function(x){return x!==ev;});save();renderDates();}
+ if(tg&&tg.showConfirm&&tg.isVersionAtLeast&&tg.isVersionAtLeast('6.2')){tg.showConfirm(msg,function(ok){if(ok)del();});return;}
+ if(confirm(msg))del();});
+$('add').onclick=function(){tap();evs.push({id:'e'+Date.now().toString(36),t:'',d:'',x:''});save();renderDates();
+ var ins=$('evs').querySelectorAll('input[type=text]');if(ins.length)ins[ins.length-1].focus();};
+
+function offTxt(o){return o===0?'точно':(o>0?'+':'−')+Math.abs(o);}
+function renderHits(){var h=pairs(evs),L=dated(evs);
+ if(L.length<2){$('hits-sum').innerHTML='';$('hits').innerHTML='<p class="when">Нужно хотя бы две даты. Заполни их во вкладке «Мои даты».</p>';return;}
+ var exact=h.filter(function(x){return x.m.off===0;}).length;
+ $('hits-sum').innerHTML='<div class="res"><span>Совпадений на '+L.length*(L.length-1)/2+' '+plural(L.length*(L.length-1)/2,'пару','пары','пар')+'</span><b>'+h.length+'</b><span>'+(exact?'из них точных: '+exact:'точных нет, только с допуском')+'</span></div>';
+ $('hits').innerHTML=h.length?h.map(function(x){var m=x.m;
+  return '<div class="hit '+m.k+'"><div class="off">'+offTxt(m.off)+'<small>'+(m.off===0?'день в день':plural(Math.abs(m.off),'день','дня','дней'))+'</small></div><div>'+
+   '<div class="tag '+(m.k==='s3'?'hot':m.k==='mx'?'mix':'')+'">'+SIGN[m.k]+'</div>'+
+   '<p><b>'+esc(x.a.t)+'</b> → <b>'+esc(x.b.t)+'</b></p>'+
+   '<p class="fx">'+x.d+' = '+m.f+(m.off?' '+(m.off>0?'+ ':'− ')+Math.abs(m.off):'')+'</p><p class="when">'+m.f+' = '+m.v+', '+human(x.a.n)+' → '+human(x.b.n)+'</p></div></div>';}).join('')
+  :'<p class="when">Ни одна пара не легла на степени. Хлебников бы поискал ещё даты.</p>';
+}
+
+function renderNodes(){var T=todayDn(),o=nodes(evs,T);
+ if(!o.length){$('node-top').innerHTML='';$('nodes').innerHTML='<p class="when">В ближайший год узловых дней нет. Добавь больше дат.</p>';return;}
+ var f=o[0];
+ $('node-top').innerHTML='<article class="card main"><div class="tag '+(f.k==='s3'?'hot':'')+'">Ближайший узел, '+SIGN[f.k]+'</div><h3>'+human(f.t)+'</h3>'+
+  '<p><b>'+soon(f.in)+'</b>: '+f.f+' = '+f.v+' '+plural(f.v,'день','дня','дней')+' от «'+esc(f.e.t)+'».</p></article>';
+ $('nodes').innerHTML=o.slice(1).map(function(x){
+  return '<div class="hit '+x.k+'"><div class="off">'+(x.in===0?'0':x.in)+'<small>'+(x.in===0?'сегодня':plural(x.in,'день','дня','дней'))+'</small></div><div>'+
+   '<div class="tag '+(x.k==='s3'?'hot':'')+'">'+SIGN[x.k]+'</div><p><b>'+human(x.t)+'</b>, '+soon(x.in)+'</p>'+
+   '<p class="fx">'+esc(x.e.t)+' + '+x.f+' ('+x.v+')</p></div></div>';}).join('')||'<p class="when">Других узлов в этом году нет.</p>';
+}
+
+function renderLine(){var L=dated(evs);
+ if(L.length<2){$('line').innerHTML='<p class="when">Нужно хотя бы две даты.</p>';return;}
+ var W=340,H=260,pad=24,y0=130,lo=L[0].n,hi=L[L.length-1].n,span=Math.max(1,hi-lo);
+ function X(n){return pad+(n-lo)/span*(W-2*pad);}
+ var best={};pairs(evs).forEach(function(h){var k=h.a.id+'|'+h.b.id;if(!best[k])best[k]=h;});
+ var s='<svg class="line" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Линия событий"><line class="l-axis" x1="'+pad+'" y1="'+y0+'" x2="'+(W-pad)+'" y2="'+y0+'"/>';
+ Object.keys(best).forEach(function(k){var h=best[k],x1=X(h.a.n),x2=X(h.b.n),up=h.m.k!=='s3',r=Math.min(95,Math.max(14,(x2-x1)/2));
+  var cy=up?y0-r*1.3:y0+r*1.3;
+  s+='<path class="arc '+(h.m.k==='s2'?'a2':h.m.k==='s3'?'a3':'amx')+'" d="M'+x1.toFixed(1)+' '+y0+' Q'+((x1+x2)/2).toFixed(1)+' '+cy.toFixed(1)+' '+x2.toFixed(1)+' '+y0+'"><title>'+esc(h.a.t+' → '+h.b.t+': '+h.d+' ≈ '+h.m.f)+'</title></path>';});
+ var lastX=-99,row=0;
+ L.forEach(function(e,i){var x=X(e.n);row=x-lastX<60?row+1:0;lastX=x;var ly=y0+(i%2?22+row*12:-12-row*12);
+  var anchor=x<60?'start':x>W-60?'end':'middle';
+  s+='<circle class="l-dot" cx="'+x.toFixed(1)+'" cy="'+y0+'" r="4"/><text class="l-txt" x="'+x.toFixed(1)+'" y="'+ly+'" text-anchor="'+anchor+'">'+esc(e.t.length>18?e.t.slice(0,17)+'…':e.t)+'</text>';});
+ s+='<text class="l-yr" x="'+pad+'" y="'+(H-6)+'">'+iso(lo)+'</text><text class="l-yr" x="'+(W-pad)+'" y="'+(H-6)+'" text-anchor="end">'+iso(hi)+'</text></svg>';
+ $('line').innerHTML=s+(Object.keys(best).length?'':'<p class="when">Дуг нет: ни одна пара не легла на степени.</p>');
+}
+
+var R={'p-dates':renderDates,'p-hits':renderHits,'p-nodes':renderNodes,'p-line':renderLine};
+var tabs=document.querySelectorAll('[role=tab]');
+tabs.forEach(function(t){t.onclick=function(){tap();tabs.forEach(function(x){var on=x===t;x.setAttribute('aria-selected',on);document.getElementById(x.getAttribute('aria-controls')).hidden=!on;});
+ R[t.getAttribute('aria-controls')]();store('doski-tab',t.id);window.scrollTo(0,0);}});
+renderDates();
+var last=store('doski-tab');if(last&&$(last)&&last!=='t-dates')$(last).onclick();
+})();
+</script>
+</body>
+</html>

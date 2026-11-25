@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ходьба</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&display=swap">
+<style>
+/* Shared kit, identical in every Klesh mini app: iOS grouped look, Telegram theme, system type,
+   spacing 4/8/12/16/24, radii 12/16, segmented tabs, chips, disclosure chevrons, 44pt targets. */
+:root{
+  --bg:#F2F2F7; --card:#FFFFFF; --ink:#000000; --muted:#6C6C70; --rule:rgba(60,60,67,.22);
+  --accent:#007AFF; --accent-text:#0062D1; --accent-fill:#0062D1; --on-accent:#FFFFFF;
+  --hot:#E0582F; --hot-text:#B93E0E; --hot-fill:#CC4516; --good:#248A3D; --good-text:#1D7333; --good-fill:#1A7F37; --wool:#B9A27C;
+  --seg:rgba(118,118,128,.12); --seg-on:#FFFFFF; --seg-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro",system-ui,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not(.tg){
+  --bg:#000000; --card:#1C1C1E; --ink:#FFFFFF; --muted:#AEAEB2; --rule:rgba(84,84,88,.65);
+  --accent:#0A84FF; --accent-text:#4DA3FF; --accent-fill:#0A6CD6; --on-accent:#FFFFFF;
+  --hot:#F07A52; --hot-text:#FF8F66; --good:#30D158; --good-text:#30D158; --wool:#C9B48E;
+  --seg:rgba(118,118,128,.24); --seg-on:#636366; --seg-shadow:none; color-scheme:dark}}
+/* Inside Telegram its theme wins: grouped background = secondary_bg, cards = section_bg. */
+html.tg{--bg:var(--tg-theme-secondary-bg-color,var(--tg-theme-bg-color));--card:var(--tg-theme-section-bg-color,var(--tg-theme-bg-color));
+  --ink:var(--tg-theme-text-color);--muted:color-mix(in srgb,var(--tg-theme-hint-color) 72%,var(--tg-theme-text-color));
+  --rule:var(--tg-theme-section-separator-color,color-mix(in srgb,var(--tg-theme-hint-color) 35%,transparent));
+  --accent:var(--tg-theme-button-color);--accent-text:color-mix(in srgb,var(--tg-theme-link-color) 75%,var(--tg-theme-text-color));
+  --accent-fill:color-mix(in srgb,var(--tg-theme-button-color) 82%,#000);--on-accent:var(--tg-theme-button-text-color);color-scheme:light}
+html.tg.tg-dark{--hot:#F07A52;--hot-text:#FF8F66;--good:#30D158;--good-text:#30D158;--wool:#C9B48E;
+  --seg:rgba(118,118,128,.24);--seg-on:#636366;--seg-shadow:none;color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 var(--body);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(16px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(24px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)))}
+button,a,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent-text)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+p{margin:0}
+.brand{font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:.005em}
+.sub{color:var(--muted);font-size:15px;line-height:1.4;margin:8px 0 0}
+.note{font-size:15px;line-height:1.4;color:var(--muted);margin:0}
+.tag{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text)}
+.tag.hot{color:var(--hot-text)}.tag.mix{color:var(--muted)}
+
+/* inset grouped card */
+.card{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.main{box-shadow:inset 0 0 0 2px var(--accent)}
+
+/* segmented tabs: fit 393pt, scroll only inside the bar if they ever do not */
+.tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(max-content,1fr);gap:2px;padding:2px;border-radius:12px;background:var(--seg);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{min-width:0;border:0;background:transparent;border-radius:10px;padding:0 10px;min-height:44px;
+  font-size:13px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--seg-on);box-shadow:var(--seg-shadow)}
+
+/* chips: pill links with a 44pt target */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;text-decoration:none;
+  font-size:15px;font-weight:600;color:var(--accent-text);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;min-height:44px;padding:0 20px;border:0;border-radius:999px;
+  background:var(--accent-fill);color:var(--on-accent);font-size:17px;font-weight:600;text-decoration:none}
+.lnk{display:inline-flex;align-items:center;align-self:flex-start;min-height:44px;color:var(--accent-text);text-decoration:none;font-size:17px}
+
+/* disclosure: chevron instead of the native triangle */
+details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;cursor:pointer;font-weight:600;font-size:17px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"";flex:none;width:9px;height:9px;margin:-5px 4px 0 0;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+details[open]>summary::after{transform:rotate(-135deg);margin-top:5px}
+@media (prefers-reduced-motion:reduce){details>summary::after{transition:none}}
+
+/* Walking study hub: who to see in Kraków, a foot measuring helper, a barefoot transition plan, the walking experiment. */
+.brand{font-size:40px}
+section{display:flex;flex-direction:column;gap:12px}
+h2{font-family:var(--display);font-weight:900;font-size:26px;text-transform:uppercase;margin:8px 0 0;line-height:1}
+.card h3{font-family:var(--display);font-weight:900;font-size:24px;line-height:1;margin:0;text-transform:uppercase}
+.card p{margin:0;font-size:15px}
+.card>b{font-size:17px;font-weight:600}
+.price{align-self:flex-start;background:var(--hot-fill);color:#fff;font-family:var(--display);font-weight:900;font-size:20px;line-height:1.1;padding:4px 9px 2px;border-radius:4px;transform:rotate(-2deg)}
+.when{font-size:15px;color:var(--muted)}
+.chips{margin-top:4px}
+.chips a.p{background:var(--accent-fill);color:var(--on-accent)}
+.flow{display:grid;gap:12px}
+.flow div{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:start}
+.flow b.n{font-family:var(--display);font-size:26px;line-height:1;color:var(--hot)}
+.ask{border-left:4px solid var(--hot);padding:2px 0 2px 12px;font-size:15px}
+.ask ul{margin:8px 0 0;padding-left:18px}
+
+/* measure */
+.stepper{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;align-items:center}
+.stepper button{height:44px;border-radius:12px;border:0;background:var(--seg);color:var(--accent-text);font-size:24px;font-weight:500;line-height:1}
+.stepper .v{text-align:center;font-family:var(--display);font-weight:900;font-size:32px;font-variant-numeric:tabular-nums;line-height:1}
+.stepper .v small{display:block;font-family:var(--body);font-weight:400;font-size:13px;color:var(--muted);margin-top:2px}
+.res{background:var(--ink);color:var(--bg);border-radius:16px;padding:16px;display:grid;gap:4px}
+.res b{font-family:var(--display);font-weight:900;font-size:36px;line-height:1}
+.res span{font-size:15px;opacity:.85}
+svg.foot{width:100%;max-width:260px;align-self:center}
+.f-line{fill:none;stroke:var(--ink);stroke-width:2.5}
+.f-dim{stroke:var(--hot);stroke-width:2;fill:none}
+.f-txt{fill:var(--hot-text);font:600 12px var(--body)}
+
+/* plan */
+.week{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;padding:12px 0;border-top:.5px solid var(--rule)}
+.week:first-child{border-top:0;padding-top:0}
+.week:last-child{padding-bottom:0}
+.week b{font-family:var(--display);font-weight:900;font-size:20px;text-transform:uppercase;line-height:1.1}
+.week p{margin:0;font-size:15px}
+.week small{display:block;color:var(--muted);font-size:15px;margin-top:4px}
+
+/* experiment */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.metrics div{background:var(--bg);border-radius:12px;padding:12px}
+.metrics b{display:block;font-size:15px;font-weight:600}
+.metrics span{font-size:13px;color:var(--muted)}
+.red{box-shadow:inset 0 0 0 2px var(--hot)}
+.red .tag{color:var(--hot-text)!important}
+.red ul{margin:0;padding-left:18px;font-size:15px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">Ходьба</div>
+    <p class="sub">Изучаем, как ты ходишь: к кому сходить в Кракове, как померить стопу, как перейти на барефуты и что отслеживать.</p>
+  </header>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-doc" aria-selected="true" aria-controls="p-doc">Врачи</button>
+    <button role="tab" id="t-foot" aria-selected="false" aria-controls="p-foot">Замер</button>
+    <button role="tab" id="t-plan" aria-selected="false" aria-controls="p-plan">Переход</button>
+    <button role="tab" id="t-exp" aria-selected="false" aria-controls="p-exp">Эксперимент</button>
+  </div>
+
+  <section id="p-doc" role="tabpanel" aria-labelledby="t-doc">
+    <div class="card">
+      <div class="tag">Порядок</div>
+      <div class="flow">
+        <div><b class="n">1</b><p><b>Физиотерапевт с анализом стопы и походки.</b> Главный визит: своды, нагрузка, как ты ставишь ногу, и план перехода на барефуты.</p></div>
+        <div><b class="n">2</b><p><b>Ортопед по LuxMed</b>, только если что-то болит: стопы, колени, поясница.</p></div>
+        <div><b class="n">3</b><p><b>Подолог</b>, если мозоли, натоптыши или вросший ноготь. Свод и нагрузку он тоже смотрит, но проще.</p></div>
+      </div>
+    </div>
+
+    <article class="card main">
+      <div class="tag">Начать с этого</div>
+      <h3>Компьютерное обследование стоп</h3>
+      <div class="price">120–270 zł</div>
+      <p>Физиотерапевт ставит тебя на платформу: видно, как распределяется вес по стопе стоя и в ходьбе (pedobarografia), плюс осмотр сводов и голеностопа. В Кракове около 20 мест, есть с сотнями отзывов.</p>
+      <p class="when">Пример: Магдалена Козьлак, анализ стоп 240 zł, в отзывах пишут, что подробно разбирает результаты и советует обувь.</p>
+      <div class="chips">
+        <a class="p" href="https://www.znanylekarz.pl/uslugi-zabiegi/komputerowe-badanie-stop/krakow">Все 20 в Кракове</a>
+        <a href="https://www.znanylekarz.pl/magdalena-kozlak/fizjoterapeuta/krakow">Магдалена Козьлак</a>
+        <a href="https://www.znanylekarz.pl/uslugi-zabiegi/diagnostyka-stop/krakow">Диагностика стоп</a>
+      </div>
+    </article>
+
+    <div class="ask"><b>Что сказать при записи</b>
+      <ul>
+        <li>Хочу перейти на барефуты для гор, нужна оценка стопы и походки.</li>
+        <li>Много сижу за компом, сутулюсь, хочу больше ходить.</li>
+        <li>Спроси, есть ли pedobarografia или анализ ходьбы на дорожке.</li>
+        <li>Возьми с собой обувь, в которой ходишь чаще всего.</li>
+      </ul>
+    </div>
+
+    <article class="card">
+      <div class="tag">Если болит</div>
+      <h3>Ортопед, LuxMed</h3>
+      <div class="price">по страховке</div>
+      <p>У LuxMed в Кракове около 18 центров, ортопеды на Wadowicka 6 и Puszkarska 7H. Обычно входит в абонемент, проверь в портале. Без абонемента 300–350 zł.</p>
+      <div class="chips">
+        <a class="p" href="https://portalpacjenta.luxmed.pl/">Портал LuxMed</a>
+        <a href="https://www.znanylekarz.pl/ortopeda/krakow/lux-med">Ортопеды LuxMed</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="tag">Кожа и ногти</div>
+      <h3>Подолог</h3>
+      <div class="price">100–200 zł</div>
+      <p>Консультация с подоскопом: отпечаток стопы, свод, натоптыши. Дешевле физио, но про походку и переход на барефуты расскажет меньше.</p>
+      <div class="chips">
+        <a class="p" href="https://www.znanylekarz.pl/podolog/krakow">Подологи Кракова</a>
+        <a href="https://www.znanylekarz.pl/uslugi-zabiegi/badanie-ortopodologiczne/krakow">Ортоподологическое обследование</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="tag">Про креветку</div>
+      <h3>Терапевт или проктолог</h3>
+      <div class="price">LuxMed</div>
+      <p>Если геморрой не проходит неделю, есть кровь или сильная боль. Через LuxMed: сначала терапевт, или сразу проктолог на Opolska 110. Без абонемента около 370–390 zł.</p>
+      <div class="chips"><a class="p" href="https://portalpacjenta.luxmed.pl/">Записаться в LuxMed</a></div>
+    </article>
+    <p class="note">Цены с ZnanyLekarz и сайтов клиник, ноябрь 2026, могут отличаться. Что входит в твой абонемент LuxMed, видно в портале пациента.</p>
+  </section>
+
+  <section id="p-foot" role="tabpanel" aria-labelledby="t-foot" hidden>
+    <div class="card">
+      <div class="tag">Как мерить</div>
+      <svg class="foot" viewBox="0 0 200 260" aria-hidden="true">
+        <rect x="20" y="10" width="160" height="240" rx="4" class="f-line" stroke-dasharray="4 4"/>
+        <path class="f-line" d="M100 26c22 0 34 10 38 30 4 24-2 44 2 74 4 30 8 60 0 86-6 18-24 24-42 22-20-2-30-14-32-34-2-26 6-52 4-80-2-26-10-44-6-66 4-22 18-32 36-32z"/>
+        <line class="f-dim" x1="160" y1="24" x2="160" y2="240"/><text class="f-txt" x="164" y="136">длина</text>
+        <line class="f-dim" x1="62" y1="96" x2="142" y2="96"/><text class="f-txt" x="74" y="90">ширина</text>
+      </svg>
+      <div class="flow">
+        <div><b class="n">1</b><p>Вечером, в носках, в которых будешь ходить. Лист A4 вплотную к стене.</p></div>
+        <div><b class="n">2</b><p>Встань с полным весом, пятка в стену. Обведи стопу карандашом, держа его вертикально.</p></div>
+        <div><b class="n">3</b><p>Длина: от стены до самого длинного пальца. Ширина: самое широкое место у косточек. Обе ноги.</p></div>
+      </div>
+    </div>
+    <h2>Посчитаю</h2>
+    <div class="card">
+      <b>Длина большей стопы</b>
+      <div class="stepper"><button type="button" data-d="len" data-s="-1" aria-label="меньше">−</button><div class="v" id="len"></div><button type="button" data-d="len" data-s="1" aria-label="больше">+</button></div>
+      <b>Ширина</b>
+      <div class="stepper"><button type="button" data-d="wid" data-s="-1" aria-label="меньше">−</button><div class="v" id="wid"></div><button type="button" data-d="wid" data-s="1" aria-label="больше">+</button></div>
+    </div>
+    <div class="res" id="res"></div>
+    <p class="note">Барефуты подбирают по длине стельки, а не по номеру: стопа плюс 1–1,5 см на ходьбу и спуск. Номера у брендов разные, поэтому сверяй с таблицей бренда и мерь в магазине. FiveFingers 43 тебе были велики: возможно, тебе нужен 42.</p>
+    <div class="chips">
+      <a class="p" href="https://www.bergfreunde.eu/xero-shoes-size-chart/">Таблица Xero, длина в см</a>
+      <a href="https://maps.app.goo.gl/jgH3edkMNmFSgFfz5">Minimal Step: мерить Vivobarefoot</a>
+    </div>
+  </section>
+
+  <section id="p-plan" role="tabpanel" aria-labelledby="t-plan" hidden>
+    <p class="ask">Главная ошибка: сразу пойти в барефутах в горы. Стопа, ахилл и икры перестраиваются месяцами. Торопишься, получаешь боль в своде или в ахилле.</p>
+    <div class="card">
+      <div class="week"><b>Неделя 1–2</b><p>По дому и коротко по городу, 20–30 минут в день.<small>Плюс босиком дома и простые упражнения для стопы.</small></p></div>
+      <div class="week"><b>Неделя 3–4</b><p>Прогулки до часа по ровному, парки, Błonia.<small>Икры ноют, это нормально. Резкая боль в своде или пятке, сбавь.</small></p></div>
+      <div class="week"><b>Месяц 2</b><p>Лёгкие тропы: Las Wolski, Kopiec Kościuszki, 2–3 часа.<small>Короткий шаг, мягкая постановка, без удара пяткой.</small></p></div>
+      <div class="week"><b>Месяц 3+</b><p>Горы с лёгким рюкзаком, сначала короткие маршруты.<small>В Татры с полным рюкзаком первое время в обычных ботинках.</small></p></div>
+    </div>
+    <h2>Упражнения для стопы</h2>
+    <div class="card">
+      <div class="flow">
+        <div><b class="n">1</b><p><b>Короткая стопа.</b> Подтяни подушечку к пятке, не сгибая пальцы, держи 5 с. 3×10.</p></div>
+        <div><b class="n">2</b><p><b>Пальцы веером.</b> Растопырь пальцы, подними только большой, потом только остальные. 3×10.</p></div>
+        <div><b class="n">3</b><p><b>Подъёмы на носки</b> медленно, вниз за 3 секунды. 3×15.</p></div>
+        <div><b class="n">4</b><p><b>Мячик под стопой</b> 2 минуты на каждую ногу, вечером.</p></div>
+      </div>
+    </div>
+    <p class="note">Это общий план. Физиотерапевт после осмотра скорректирует его под тебя.</p>
+  </section>
+
+  <section id="p-exp" role="tabpanel" aria-labelledby="t-exp" hidden>
+    <div class="card">
+      <div class="tag">Гипотеза</div>
+      <h3>Больше ходить, на воздухе</h3>
+      <p>Спина разогнётся, а геморрой пройдёт быстрее. Проверяем: исходная точка, потом чек-ины, через пару недель смотрим, что сработало.</p>
+    </div>
+    <div class="card">
+      <div class="tag">Чек-ин: напиши в чат "чекин"</div>
+      <div class="metrics">
+        <div><b>Спина</b><span>0 ровный, 10 креветка</span></div>
+        <div><b>Геморрой</b><span>0–10, была ли кровь</span></div>
+        <div><b>Ходьба</b><span>минут или шагов</span></div>
+        <div><b>Стул</b><span>норм, твёрдый, натуживался</span></div>
+        <div><b>Вода</b><span>литров за день</span></div>
+        <div><b>Сидение</b><span>часов за компом</span></div>
+      </div>
+      <p class="when">Исходная точка завтра: вес, талия, стопы и две оценки по 10-балльной.</p>
+    </div>
+    <div class="card">
+      <div class="tag">Помогает</div>
+      <div class="flow">
+        <div><b class="n">1</b><p>Вставать каждые 45–60 минут за компом, 3 минуты походить.</p></div>
+        <div><b class="n">2</b><p>Вода 2+ литра, клетчатка или псиллиум (babka płesznik).</p></div>
+        <div><b class="n">3</b><p>Не натуживаться и не сидеть в туалете с телефоном.</p></div>
+        <div><b class="n">4</b><p>Бупропион может крепить: если стул твёрже, скажи психиатру.</p></div>
+      </div>
+    </div>
+    <div class="card red">
+      <div class="tag" style="color:var(--hot)">Сразу к врачу</div>
+      <ul><li>много крови или тёмная кровь</li><li>сильная боль или твёрдый болезненный узел</li><li>неделя без улучшения</li><li>резко изменился стул, температура</li></ul>
+    </div>
+  </section>
+</div>
+<script>
+(function(){
+var tg=window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.platform!=='unknown'?window.Telegram.WebApp:null;
+if(tg){var R=document.documentElement;R.classList.add('tg');tg.ready();tg.expand();
+ var sch=function(){R.classList.toggle('tg-dark',tg.colorScheme==='dark');};sch();
+ try{tg.onEvent('themeChanged',sch);tg.setHeaderColor('secondary_bg_color');tg.setBackgroundColor('secondary_bg_color');}catch(e){}
+ try{tg.BackButton.show();tg.BackButton.onClick(function(){location.href='../';});}catch(e){}}
+function tap(){try{tg&&tg.HapticFeedback?tg.HapticFeedback.selectionChanged():navigator.vibrate&&navigator.vibrate(12)}catch(e){}}
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+document.addEventListener('click',function(e){var a=e.target.closest('a[href^="http"]');if(a&&tg){e.preventDefault();tg.openLink(a.href);}});
+
+var m=store('walk-foot')||{len:270,wid:100};
+function rf(){
+ document.getElementById('len').innerHTML=m.len+' мм<small>'+(m.len/10).toFixed(1)+' см</small>';
+ document.getElementById('wid').innerHTML=m.wid+' мм<small>'+(m.wid/10).toFixed(1)+' см</small>';
+ var lo=m.len+10,hi=m.len+15,r=m.wid/m.len;
+ var w=r>=0.40?'широкая стопа: барефуты как раз под неё, Xero и Vivobarefoot с широким носком':r>=0.37?'средняя ширина: подойдут почти все барефуты':'узкая стопа: смотри модели с регулируемой шнуровкой, Merrell и Vivobarefoot';
+ document.getElementById('res').innerHTML='<span>Ищи длину стельки</span><b>'+(lo/10).toFixed(1)+'–'+(hi/10).toFixed(1)+' см</b><span>'+w+'</span>';
+ store('walk-foot',m);
+}
+document.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){tap();var k=b.dataset.d;m[k]=Math.max(k==='len'?200:70,Math.min(k==='len'?330:140,m[k]+(+b.dataset.s)));rf();}});
+rf();
+
+var tabs=document.querySelectorAll('[role=tab]');
+tabs.forEach(function(t){t.onclick=function(){tap();tabs.forEach(function(x){var on=x===t;x.setAttribute('aria-selected',on);document.getElementById(x.getAttribute('aria-controls')).hidden=!on;});window.scrollTo(0,0);}});
+})();
+</script>
+</body>
+</html>

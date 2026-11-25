@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Барефут-подбор</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&display=swap">
+<style>
+/* Shared kit, identical in every Klesh mini app: iOS grouped look, Telegram theme, system type,
+   spacing 4/8/12/16/24, radii 12/16, segmented tabs, chips, disclosure chevrons, 44pt targets. */
+:root{
+  --bg:#F2F2F7; --card:#FFFFFF; --ink:#000000; --muted:#6C6C70; --rule:rgba(60,60,67,.22);
+  --accent:#007AFF; --accent-text:#0062D1; --accent-fill:#0062D1; --on-accent:#FFFFFF;
+  --hot:#E0582F; --hot-text:#B93E0E; --hot-fill:#CC4516; --good:#248A3D; --good-text:#1D7333; --good-fill:#1A7F37; --wool:#B9A27C;
+  --seg:rgba(118,118,128,.12); --seg-on:#FFFFFF; --seg-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro",system-ui,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not(.tg){
+  --bg:#000000; --card:#1C1C1E; --ink:#FFFFFF; --muted:#AEAEB2; --rule:rgba(84,84,88,.65);
+  --accent:#0A84FF; --accent-text:#4DA3FF; --accent-fill:#0A6CD6; --on-accent:#FFFFFF;
+  --hot:#F07A52; --hot-text:#FF8F66; --good:#30D158; --good-text:#30D158; --wool:#C9B48E;
+  --seg:rgba(118,118,128,.24); --seg-on:#636366; --seg-shadow:none; color-scheme:dark}}
+/* Inside Telegram its theme wins: grouped background = secondary_bg, cards = section_bg. */
+html.tg{--bg:var(--tg-theme-secondary-bg-color,var(--tg-theme-bg-color));--card:var(--tg-theme-section-bg-color,var(--tg-theme-bg-color));
+  --ink:var(--tg-theme-text-color);--muted:color-mix(in srgb,var(--tg-theme-hint-color) 72%,var(--tg-theme-text-color));
+  --rule:var(--tg-theme-section-separator-color,color-mix(in srgb,var(--tg-theme-hint-color) 35%,transparent));
+  --accent:var(--tg-theme-button-color);--accent-text:color-mix(in srgb,var(--tg-theme-link-color) 75%,var(--tg-theme-text-color));
+  --accent-fill:color-mix(in srgb,var(--tg-theme-button-color) 82%,#000);--on-accent:var(--tg-theme-button-text-color);color-scheme:light}
+html.tg.tg-dark{--hot:#F07A52;--hot-text:#FF8F66;--good:#30D158;--good-text:#30D158;--wool:#C9B48E;
+  --seg:rgba(118,118,128,.24);--seg-on:#636366;--seg-shadow:none;color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 var(--body);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(16px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(24px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)))}
+button,a,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent-text)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+p{margin:0}
+.brand{font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:.005em}
+.sub{color:var(--muted);font-size:15px;line-height:1.4;margin:8px 0 0}
+.note{font-size:15px;line-height:1.4;color:var(--muted);margin:0}
+.tag{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text)}
+.tag.hot{color:var(--hot-text)}.tag.mix{color:var(--muted)}
+
+/* inset grouped card */
+.card{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.main{box-shadow:inset 0 0 0 2px var(--accent)}
+
+/* segmented tabs: fit 393pt, scroll only inside the bar if they ever do not */
+.tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(max-content,1fr);gap:2px;padding:2px;border-radius:12px;background:var(--seg);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{min-width:0;border:0;background:transparent;border-radius:10px;padding:0 10px;min-height:44px;
+  font-size:13px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--seg-on);box-shadow:var(--seg-shadow)}
+
+/* chips: pill links with a 44pt target */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;text-decoration:none;
+  font-size:15px;font-weight:600;color:var(--accent-text);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;min-height:44px;padding:0 20px;border:0;border-radius:999px;
+  background:var(--accent-fill);color:var(--on-accent);font-size:17px;font-weight:600;text-decoration:none}
+.lnk{display:inline-flex;align-items:center;align-self:flex-start;min-height:44px;color:var(--accent-text);text-decoration:none;font-size:17px}
+
+/* disclosure: chevron instead of the native triangle */
+details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;cursor:pointer;font-weight:600;font-size:17px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"";flex:none;width:9px;height:9px;margin:-5px 4px 0 0;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+details[open]>summary::after{transform:rotate(-135deg);margin-top:5px}
+@media (prefers-reduced-motion:reduce){details>summary::after{transition:none}}
+
+/* Step-by-step picker: one question per screen, then a ranked shelf. */
+html,body{height:100%}
+.app{min-height:100%}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.brand{font-size:28px}
+.step{font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{display:flex;gap:4px}.bar i{flex:1;height:4px;border-radius:2px;background:var(--rule)}.bar i.on{background:var(--accent)}
+
+h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,10vw,50px);line-height:.95;margin:4px 0 8px;text-transform:uppercase;text-wrap:balance}
+.hint{color:var(--muted);margin:0;font-size:15px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;border:0;border-radius:16px;background:var(--card);padding:12px 16px;min-height:68px;color:var(--ink)}
+.opt b{display:block;font-size:17px;font-weight:600}
+.opt span{display:block;color:var(--muted);font-size:15px;line-height:1.35}
+.opt>span:last-child{flex:1;min-width:0}
+.opt::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-top:2px solid var(--muted);transform:rotate(45deg);margin-right:4px;opacity:.7}
+.opt .ico{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:12px;background:var(--bg);font-family:var(--display);font-weight:900;font-size:20px;color:var(--accent-text)}
+.opt:active{background:color-mix(in srgb,var(--card) 88%,var(--ink))}
+.back{align-self:flex-start;display:inline-flex;align-items:center;min-height:44px;border:0;background:transparent;color:var(--accent-text);padding:0;font-size:17px;margin:-8px 0}
+
+.res-top{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 0 0 2px var(--accent)}
+.res-top h2{font-family:var(--display);font-weight:900;font-size:36px;line-height:.95;margin:0;text-transform:uppercase}
+.price{align-self:flex-start;background:var(--hot-fill);color:#fff;font-family:var(--display);font-weight:900;font-size:24px;line-height:1.1;padding:4px 10px 2px;border-radius:4px;transform:rotate(-2deg)}
+.why{margin:0;font-size:17px}
+.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:15px;align-items:baseline}
+.facts dt{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.facts dd{margin:0}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:15px}
+.pc div{min-width:0}.pc b{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.pc .p b{color:var(--good-text)}.pc .c b{color:var(--hot-text)}
+.pc ul{margin:4px 0 0;padding-left:18px}
+.match{height:6px;border-radius:3px;background:var(--rule);overflow:hidden}.match i{display:block;height:100%;background:var(--accent)}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.links a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;text-decoration:none;border-radius:999px;font-size:15px;font-weight:600;color:var(--accent-text);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.alt-h{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:8px 0 -8px;padding:0 16px}
+.alt{background:var(--card);border-radius:16px;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:baseline}
+.alt b{font-size:17px;font-weight:600}.alt .ap{grid-column:2;font-family:var(--display);font-weight:900;font-size:20px;white-space:nowrap;color:var(--ink)}
+.alt span:not(.ap){grid-column:1/-1;color:var(--muted);font-size:15px}
+
+.plan{background:var(--card);border-radius:16px;padding:0 16px}
+.plan ol{margin:0 0 12px;padding-left:22px;display:grid;gap:8px;font-size:15px}
+.plan p{font-size:15px;color:var(--muted);margin:0 0 16px}
+.again{border:0;border-radius:12px;background:var(--accent-fill);color:var(--on-accent);padding:0 16px;font-size:17px;font-weight:600;min-height:50px}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+(function(){
+var tg=window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.platform!=='unknown'?window.Telegram.WebApp:null;
+if(tg){var R=document.documentElement;R.classList.add('tg');tg.ready();tg.expand();
+ var sch=function(){R.classList.toggle('tg-dark',tg.colorScheme==='dark');};sch();
+ try{tg.onEvent('themeChanged',sch);tg.setHeaderColor('secondary_bg_color');tg.setBackgroundColor('secondary_bg_color');}catch(e){}
+ try{tg.BackButton.show();tg.BackButton.onClick(function(){location.href='../';});}catch(e){}}
+function tap(){try{tg&&tg.HapticFeedback?tg.HapticFeedback.selectionChanged():navigator.vibrate&&navigator.vibrate(15)}catch(e){}}
+
+var Q=[
+ {k:'terrain',t:'Где будешь ходить',h:'Это главное: от поверхности зависит, сколько защиты нужно.',o:[
+   ['rock','Горы и камни','Татры, осыпи, острые камни','▲'],['mud','Лес и грязь','Бескиды, корни, мокрая глина','≈'],
+   ['trail','Тропы и парки','Ойцов, утоптанные дорожки','~'],['city','Город и всё подряд','асфальт, брусчатка, выезды за город','□']]},
+ {k:'season',t:'Когда',h:'Мембрана и утепление нужны не всем.',o:[
+   ['summer','Лето','сухо и тепло','☼'],['wet','Межсезонье','дождь, лужи, слякоть','☂'],['winter','Зима','снег и мороз','❄']]},
+ {k:'height',t:'Кроссовок или ботинок',h:'Ботинок держит голеностоп и не набирает снег.',o:[
+   ['low','Кроссовок','легче и свободнее','↓'],['mid','Ботинок','защита и устойчивость','↑'],['any','Не важно','подбери сам','?']]},
+ {k:'exp',t:'Опыт в барефутах',h:'Новичкам нужна подошва потолще и больше устойчивости.',o:[
+   ['new','Новичок','ещё не ходил или только начинаю','1'],['some','Есть опыт','ношу каждый день, стопы привыкли','2']]},
+ {k:'budget',t:'Бюджет',h:'Цены из польских магазинов, ноябрь 2026.',o:[
+   ['low','До 500 zł','разумно','zł'],['any','Не важно','главное, чтобы подошли','∞']]}
+];
+
+// sole/protection/stability: 1..5 editorial scale
+var M=[
+ {id:'scrambler-mid',n:'Xero Scrambler Trail Mid WP',p:'505–665 zł',pv:560,h:'mid',wp:true,warm:false,
+  fit:{rock:3,mud:2,trail:1,city:0},sea:{summer:1,wet:3,winter:2},prot:5,stab:5,
+  why:'Самый устойчивый барефут в тестах OutdoorGearLab: 9,2 из 10 по стабильности. Мембрана, высокий борт, протектор для камней.',
+  pro:['держит голеностоп','не промокает','уверенно на камнях'],con:['тяжелее остальных','жарко летом'],
+  links:[['Decathlon','https://www.decathlon.pl/p/mp/xero-shoes/buty-berefoot-meskie-xero-shoes-scrambler-trail-mid-wp/_/R-p-ed131e94-47cb-4e5a-b423-8f0d0a3558bf'],['Xero (PL)','https://www.xeroshoes.eu/pl/shop/boots/scrambler-trail-mid-wp-men'],['Обзор','https://www.outdoorgearlab.com/reviews/shoes-and-boots/barefoot-shoes-men/xero-scrambler-trail-mid']]},
+ {id:'scrambler-low',n:'Xero Scrambler Trail Low WP',p:'440–580 zł',pv:460,h:'low',wp:true,warm:false,
+  fit:{rock:2,mud:2,trail:3,city:2},sea:{summer:2,wet:3,winter:0},prot:4,stab:4,
+  why:'Та же подошва и мембрана, что у Mid, но кроссовок: легче (около 280 г), свободнее, проще на каждый день.',
+  pro:['мембрана','хороший протектор','универсальный'],con:['голеностоп открыт','снег зайдёт внутрь'],
+  links:[['8a.pl (все Xero)','https://8a.pl/buty-barefoot-meskie/xero-shoes']]},
+ {id:'tracker-at',n:'Vivobarefoot Tracker Textile AT',p:'495–520 zł',pv:500,h:'mid',wp:false,warm:false,
+  fit:{rock:2,mud:3,trail:2,city:1},sea:{summer:2,wet:2,winter:1},prot:4,stab:3,
+  why:'Ботинок с крупным протектором для грязи и леса и прослойкой против проколов. Ближе к настоящему барефуту, чем Xero.',
+  pro:['цепкий в грязи','защита от проколов','хорошее чувство земли'],con:['нужен опыт','меньше устойчивости на камнях'],
+  links:[['Sportano','https://sportano.pl/p/879303/buty-barefoot-meskie-vivobarefoot-tracker-textile-at-obsidian'],['Обзор','https://www.outdoorgearlab.com/reviews/shoes-and-boots/barefoot-shoes/vivobarefoot-tracker-ii-fg']]},
+ {id:'tracker-winter',n:'Vivobarefoot Tracker Winter II',p:'≈ 670 zł',pv:670,h:'mid',wp:true,warm:true,
+  fit:{rock:2,mud:3,trail:2,city:2},sea:{summer:0,wet:2,winter:3},prot:4,stab:3,
+  why:'Утеплённая версия Tracker для снега и мороза. Единственный в подборке, в котором тепло зимой.',
+  pro:['тёплый','защита от воды и снега','протектор для зимы'],con:['дорогой','летом бесполезен'],
+  links:[['Sportano','https://sportano.pl/p/806094/buty-barefoot-meskie-vivobarefoot-tracker-winter-ii-tan']]},
+ {id:'trail-glove',n:'Merrell Trail Glove 8',p:'365–435 zł',pv:400,h:'low',wp:false,warm:false,
+  fit:{rock:1,mud:2,trail:3,city:3},sea:{summer:3,wet:1,winter:0},prot:3,stab:3,
+  why:'Номер один среди барефутов в OutdoorGearLab в 2026: лучший баланс между ощущением земли и защитой на тропе.',
+  pro:['лёгкий','отличное чувство земли','на каждый день'],con:['не для острой осыпи','промокает'],
+  links:[['8a.pl','https://8a.pl/buty-trailowe-merrell-trail-glove-8-black-gum'],['Обзор','https://www.outdoorgearlab.com/reviews/shoes-and-boots/barefoot-shoes-men/merrell-trail-glove-8']]},
+ {id:'mesa',n:'Xero Mesa Trail WP',p:'370–410 zł',pv:390,h:'low',wp:true,warm:false,
+  fit:{rock:2,mud:2,trail:3,city:2},sea:{summer:2,wet:3,winter:0},prot:3,stab:3,
+  why:'Лёгкий трейловый кроссовок с мембраной, самый доступный в подборке. Версия Mesa Summit с каменной пластиной в Польше не продаётся.',
+  pro:['не промокает','лёгкий','дешевле остальных'],con:['защиты меньше, чем у Scrambler','голеностоп открыт'],
+  links:[['8a.pl','https://8a.pl/buty-trailowe-xero-shoes-mesa-trail-wp-black']]}
+];
+
+function score(m,a){var s=m.fit[a.terrain]*3+m.sea[a.season]*2;
+ if(a.height!=='any')s+=m.h===a.height?3:-2;
+ if(a.exp==='new')s+=(m.prot+m.stab-6);
+ if(a.budget==='low'&&m.pv)s+=m.pv<=500?2:-3;
+ if(a.season==='winter'&&!m.warm&&!m.wp)s-=3;
+ return s;}
+
+var st={i:0,a:{}};var app=document.getElementById('app');
+function el(h){app.innerHTML=h;window.scrollTo(0,0);}
+function head(){return '<header><div class="brand">Барефуты</div><div class="step">'+(st.i<Q.length?(st.i+1)+' / '+Q.length:'подбор готов')+'</div></header><div class="bar">'+Q.map(function(_,k){return '<i class="'+(k<=st.i?'on':'')+'"></i>'}).join('')+'</div>';}
+
+function ask(){var q=Q[st.i];
+ el(head()+(st.i?'<button class="back" id="back">← Назад</button>':'')+'<div><h1>'+q.t+'</h1><p class="hint">'+q.h+'</p></div><div class="opts">'+
+  q.o.map(function(o){return '<button class="opt" data-v="'+o[0]+'"><span class="ico" aria-hidden="true">'+o[3]+'</span><span><b>'+o[1]+'</b><span>'+o[2]+'</span></span></button>'}).join('')+'</div>');
+ app.querySelectorAll('.opt').forEach(function(b){b.onclick=function(){tap();st.a[q.k]=b.dataset.v;st.i++;st.i<Q.length?ask():result();}});
+ var bk=document.getElementById('back');if(bk)bk.onclick=function(){st.i--;ask();};}
+
+function result(){
+ var r=M.map(function(m){return {m:m,s:score(m,st.a)}}).sort(function(x,y){return y.s-x.s});
+ var max=r[0].s,min=Math.min.apply(null,r.map(function(x){return x.s})),top=r[0].m;
+ function pct(s){return Math.round(40+60*(s-min)/Math.max(1,max-min))}
+ var warn=st.a.terrain==='rock'&&st.a.exp==='new'?'<p class="note">Новичку на камнях: сначала привыкни к барефутам на простых тропах, а в Татры с рюкзаком первое время ходи в обычных ботинках.</p>':'';
+ if(tg)try{tg.HapticFeedback.notificationOccurred('success')}catch(e){}
+ el(head()+
+ '<section class="res-top"><div class="tag">Тебе подойдёт</div><h2>'+top.n+'</h2><div class="price">'+top.p+'</div>'+
+ '<div class="match" aria-label="совпадение"><i style="width:'+pct(r[0].s)+'%"></i></div>'+
+ '<p class="why">'+top.why+'</p>'+
+ '<dl class="facts"><dt>Высота</dt><dd>'+(top.h==='mid'?'ботинок':'кроссовок')+'</dd><dt>Вода</dt><dd>'+(top.wp?'мембрана, не промокает':'промокает, зато дышит')+'</dd><dt>Защита</dt><dd>'+top.prot+' из 5</dd><dt>Устойчивость</dt><dd>'+top.stab+' из 5</dd></dl>'+
+ '<div class="pc"><div class="p"><b>Плюсы</b><ul>'+top.pro.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div><div class="c"><b>Минусы</b><ul>'+top.con.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div></div>'+
+ '<div class="links">'+top.links.map(function(l){return '<a href="'+l[1]+'" target="_blank" rel="noopener">'+l[0]+'</a>'}).join('')+'</div></section>'+warn+
+ '<p class="alt-h">Ещё варианты</p>'+r.slice(1,3).map(function(x){return '<div class="alt"><b>'+x.m.n+'</b><span class="ap">'+x.m.p+'</span><span>'+x.m.why+'</span></div>'}).join('')+
+ '<details class="plan"><summary>Как перейти и не убить ахилл</summary><ol>'+
+ '<li>Недели 1–2: по 30–60 минут в день, только ровные дорожки.</li><li>Недели 3–4: до 2 часов, можно парки и простые тропы.</li><li>Месяц 2: полдня на тропе, лёгкий рюкзак.</li><li>Месяц 3 и дальше: целый день в горах, если икры и стопы не болят на следующий день.</li></ol>'+
+ '<p>Боль в ахилле или своде стопы, которая не проходит к утру: сбавь темп на неделю. Не проходит дольше, сходи к врачу. Мерить обувь лучше вечером, пальцам должно быть свободно.</p></details>'+
+ '<button class="again" id="again">Подобрать заново</button><p class="note">Цены из 8a.pl и Sportano, ноябрь 2026. Оценки защиты и устойчивости: мнение по обзорам, а не лабораторный замер.</p>');
+ app.querySelectorAll('.links a').forEach(function(a){a.onclick=function(e){if(tg){e.preventDefault();tg.openLink(a.href);}}});
+ document.getElementById('again').onclick=function(){st={i:0,a:{}};ask();};}
+
+ask();
+})();
+</script>
+</body>
+</html>
